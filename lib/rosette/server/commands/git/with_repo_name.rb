@@ -7,6 +7,10 @@ module Rosette
       module WithRepoName
         attr_reader :repo_name
 
+        def self.included(base)
+          base.validate :repo_name, repo: true
+        end
+
         def set_repo_name(repo_name)
           @repo_name = repo_name
           self

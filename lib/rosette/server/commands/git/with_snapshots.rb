@@ -5,13 +5,12 @@ module Rosette
     module Commands
 
       module WithSnapshots
-        def take_snapshot(repo, commit_id, paths)
+        def take_snapshot(repo, commit_id, paths = [])
           paths = Array(paths)
           rev = repo.get_rev_commit(commit_id)
           factory = snapshot_factory.new(repo, rev)
           factory = factory.filter_by_paths(paths) if paths.size > 0
           snapshot = factory.take_snapshot
-          datastore.phrases_by_commits(repo_name, snapshot)
         end
 
         private

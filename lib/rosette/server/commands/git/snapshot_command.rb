@@ -4,13 +4,14 @@ module Rosette
   module Server
     module Commands
 
-      class SnapshotCommand < Command
+      class SnapshotCommand < GitCommand
         include WithSnapshots
         include WithRepoName
         include WithRef
 
         def execute
-          take_snapshot(get_repo(repo_name).repo, commit_id, [])
+          snapshot = take_snapshot(get_repo(repo_name).repo, commit_id)
+          datastore.phrases_by_commits(repo_name, snapshot)
         end
       end
 

@@ -5,7 +5,7 @@ module Rosette
     module Commands
 
       # the base class for commands that need to calculate diffs (eg. diff, show)
-      class DiffBaseCommand < Command
+      class DiffBaseCommand < GitCommand
         protected
 
         include WithSnapshots
@@ -148,7 +148,7 @@ module Rosette
         end
 
         def partition_phrases(phrases)
-          phrases.partition { |ph| ph.meta_key.blank? }
+          phrases.partition { |ph| ph.index_key == :key }
         end
       end
 
