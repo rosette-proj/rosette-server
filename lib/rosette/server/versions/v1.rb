@@ -42,8 +42,9 @@ module Rosette
         get :list do
           Rosette::Server
             .configuration
-            .extractor_configs
-            .map { |config| config.extractor.class.to_s }
+            .repo_configs.each_with_object({}) do |config, ret|
+              ret[config.name] = config.extractor_configs.map { |config| config.extractor.class.to_s }
+            end
         end
       end
 
@@ -120,6 +121,22 @@ module Rosette
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
           ).map(&:to_h)
+        end
+
+        #### REPO SNAPSHOT (snapshot without translations) ####
+
+        params do
+          requires :repo_name, type: String
+          requires :ref, type: String, present: true
+        end
+
+        desc 'Returns the commit ids for the most recent changes for each file in the repository'
+        get :repo_snapshot do
+          validate_and_execute(
+            RepoSnapshotCommand.new(Rosette::Server.configuration)
+              .set_repo_name(params[:repo_name])
+              .set_ref(params[:ref])
+          )
         end
       end
 

@@ -19,6 +19,7 @@ module Rosette
 
           repo.each_commit(start).with_index do |rev_commit, idx|
             commit_processor.process_each_phrase(repo_name, rev_commit.getId.name) do |phrase|
+              yield phrase if block_given?
               datastore.store_phrase(repo_name, phrase)
             end
 

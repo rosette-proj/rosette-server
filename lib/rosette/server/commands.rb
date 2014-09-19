@@ -9,6 +9,7 @@ module Rosette
       autoload :DiffCommand,           'rosette/server/commands/git/diff_command'
       autoload :ShowCommand,           'rosette/server/commands/git/show_command'
       autoload :SnapshotCommand,       'rosette/server/commands/git/snapshot_command'
+      autoload :RepoSnapshotCommand,   'rosette/server/commands/git/repo_snapshot_command'
 
       autoload :AddTranslationCommand, 'rosette/server/commands/translations/add_translation_command'
       autoload :ExportCommand,         'rosette/server/commands/translations/export_command'
