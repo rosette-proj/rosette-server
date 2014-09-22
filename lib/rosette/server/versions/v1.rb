@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+java_import java.lang.System
+
 require 'shellwords'
 
 require 'rosette/server/version'
@@ -50,6 +52,10 @@ module Rosette
 
       get :env do
         ENV.to_h
+      end
+
+      get :property do
+        [System.getProperty(params[:prop])]
       end
 
       resource :git do
