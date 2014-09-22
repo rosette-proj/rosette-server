@@ -48,6 +48,10 @@ module Rosette
         end
       end
 
+      get :env do
+        ENV.to_h
+      end
+
       resource :git do
         #### COMMIT ####
 
