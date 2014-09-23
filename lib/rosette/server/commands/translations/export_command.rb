@@ -58,7 +58,8 @@ module Rosette
             payload: encode(stream.string),
             encoding: serializer_instance.encoding.to_s,
             translation_count: translation_count,
-            base_64_encoded: base_64_encode
+            base_64_encoded: base_64_encode,
+            locale: locale
           }
 
           if include_snapshot
@@ -84,7 +85,7 @@ module Rosette
         end
 
         def each_translation(repo_config, snapshot)
-          datastore.translations_by_commits(repo_name, snapshot) do |trans_chunk|
+          datastore.translations_by_commits(repo_name, locale, snapshot) do |trans_chunk|
             trans_chunk.each do |trans|
               yield trans
             end

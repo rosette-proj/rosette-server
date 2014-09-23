@@ -4,6 +4,7 @@ module Rosette
   module Server
     module Tools
 
+      # Walks the commits in a repo and imports phrases for all of them.
       class HistoryBuilder
         attr_reader :config, :error_reporter, :progress_reporter
 
