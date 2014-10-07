@@ -113,7 +113,7 @@ module Rosette
               end
 
               state = if idx
-                if found_diff_point_phrase[idx].key == head_phrase.key
+                if diff_point_phrases[idx].key == head_phrase.key
                   :unmodified
                 else
                   :modified

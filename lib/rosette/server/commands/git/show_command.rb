@@ -18,7 +18,7 @@ module Rosette
 
           # hopefully the number of parents will only be one or two
           parent_phrases = parent_commit_ids.flat_map do |parent_commit_id|
-            take_snapshot(repo, parent_commit_id, paths)
+            datastore.phrases_by_commits(repo_name, take_snapshot(repo, parent_commit_id, paths)).to_a
           end
 
           compare(child_phrases, parent_phrases)
