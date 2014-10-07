@@ -60,7 +60,7 @@ module Rosette
             }
 
             begin
-              datastore.add_translation(repo_name, attrs)
+              datastore.add_or_update_translation(repo_name, attrs)
             rescue Rosette::DataStores::Errors::PhraseNotFoundError
             end
           end

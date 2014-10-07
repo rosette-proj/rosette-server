@@ -85,10 +85,8 @@ module Rosette
         end
 
         def each_translation(repo_config, snapshot)
-          datastore.translations_by_commits(repo_name, locale, snapshot) do |trans_chunk|
-            trans_chunk.each do |trans|
-              yield trans
-            end
+          datastore.translations_by_commits(repo_name, locale, snapshot) do |trans|
+            yield trans
           end
         end
       end

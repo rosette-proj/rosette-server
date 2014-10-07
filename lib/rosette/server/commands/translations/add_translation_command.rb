@@ -27,7 +27,7 @@ module Rosette
         end
 
         def execute
-          datastore.add_translation(
+          datastore.add_or_update_translation(
             repo_name, {
               key: key,
               meta_key: meta_key,
