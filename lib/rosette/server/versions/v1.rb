@@ -16,6 +16,7 @@ module Rosette
 
     class V1 < Grape::API
       include Rosette::Server::Commands
+      logger Rosette.logger
 
       class Present < Grape::Validations::Validator
         def validate_param!(attr_name, params)
