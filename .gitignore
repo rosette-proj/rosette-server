@@ -3,3 +3,4 @@ Gemfile.lock
 .jbundler/
 .DS_Store
 tester.rb
+.ruby-version
