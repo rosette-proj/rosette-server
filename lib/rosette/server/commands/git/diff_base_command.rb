@@ -32,15 +32,15 @@ module Rosette
           key_head_to_diff_point(
             partitioned_head_phrases.first,
             partitioned_diff_point_phrases.first
-          ) do |phrase, state|
-            diff[state] << phrase
+          ) do |phrase, state, old_phrase|
+            diff[state] << DiffEntry.new(phrase, state, old_phrase)
           end
 
           key_diff_point_to_head(
             partitioned_head_phrases.first,
             partitioned_diff_point_phrases.first
-          ) do |phrase, state|
-            diff[state] << phrase
+          ) do |phrase, state, old_phrase|
+            diff[state] << DiffEntry.new(phrase, state, old_phrase)
           end
 
           diff
@@ -85,15 +85,15 @@ module Rosette
           meta_key_head_to_diff_point(
             partitioned_head_phrases.last,
             partitioned_diff_point_phrases.last
-          ) do |phrase, state|
-            diff[state] << phrase
+          ) do |phrase, state, old_phrase|
+            diff[state] << DiffEntry.new(phrase, state, old_phrase)
           end
 
           meta_key_diff_point_to_head(
             partitioned_head_phrases.last,
             partitioned_diff_point_phrases.last
-          ) do |phrase, state|
-            diff[state] << phrase
+          ) do |phrase, state, old_phrase|
+            diff[state] << DiffEntry.new(phrase, state, old_phrase)
           end
 
           diff
@@ -122,7 +122,11 @@ module Rosette
                 :added
               end
 
-              yield head_phrase, state
+              if state == :modified
+                yield head_phrase, state, diff_point_phrases[idx]
+              else
+                yield head_phrase, state
+              end
             end
           else
             to_enum(__method__, head_phrases, diff_point_phrases)

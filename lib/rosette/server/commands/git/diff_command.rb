@@ -37,8 +37,17 @@ module Rosette
         def execute
           repo = get_repo(repo_name).repo
           entries = repo.diff(head_commit_id, diff_point_commit_id, paths)
-          head_phrases = take_snapshot(repo, head_commit_id, entries.map(&:getNewPath))
-          diff_point_phrases = take_snapshot(repo, diff_point_commit_id, entries.map(&:getOldPath))
+
+          head_phrases = datastore.phrases_by_commits(
+            repo_name,
+            take_snapshot(repo, head_commit_id, entries.map(&:getNewPath))
+          )
+
+          diff_point_phrases = datastore.phrases_by_commits(
+            repo_name,
+            take_snapshot(repo, diff_point_commit_id, entries.map(&:getOldPath))
+          )
+
           compare(head_phrases, diff_point_phrases)
         end
       end

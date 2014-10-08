@@ -17,6 +17,7 @@ module Rosette
       autoload :WithRepoName,          'rosette/server/commands/git/with_repo_name'
       autoload :WithRef,               'rosette/server/commands/git/with_ref'
       autoload :WithSnapshots,         'rosette/server/commands/git/with_snapshots'
+      autoload :DiffEntry,             'rosette/server/commands/git/diff_entry'
       autoload :WithLocale,            'rosette/server/commands/translations/with_locale'
 
       class Command
