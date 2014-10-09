@@ -27,9 +27,19 @@ module Rosette
       end
 
       helpers do
+        def logger
+          self.class.logger
+        end
+
         def validate_and_execute(command)
           if command.valid?
-            command.execute
+            begin
+              command.execute
+            rescue => e
+              logger.error("Error occured during command #{command}: #{e.message}")
+              logger.error(e.backtrace.join("\n"))
+              error!({ error: 'unexpected error', detail: e.message }, 500)
+            end
           else
             param, messages = command.messages.first
             raise Grape::Exceptions::Validation, param: param, message: messages.first
