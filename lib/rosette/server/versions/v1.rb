@@ -28,7 +28,7 @@ module Rosette
 
       helpers do
         def logger
-          self.class.logger
+          V1.logger
         end
 
         def validate_and_execute(command)
