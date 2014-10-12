@@ -14,11 +14,11 @@ module Rosette
           @progress_reporter = progress_reporter
         end
 
-        def build_history(repo_name, start = 'master')
+        def build_history(repo_name)
           repo = get_repo(repo_name).repo
-          commit_count = repo.commit_count(start)
+          commit_count = repo.commit_count
 
-          repo.each_commit(start).with_index do |rev_commit, idx|
+          repo.each_commit.with_index do |rev_commit, idx|
             commit_processor.process_each_phrase(repo_name, rev_commit.getId.name) do |phrase|
               yield phrase if block_given?
               datastore.store_phrase(repo_name, phrase)
