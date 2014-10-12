@@ -48,7 +48,10 @@ module Rosette
           translation_count = 0
 
           each_translation(repo_config, snapshot) do |trans|
-            serializer_instance.write_translation(trans)
+            serializer_instance.write_key_value(
+              trans.phrase.index_value, trans.translation
+            )
+
             translation_count += 1
           end
 
