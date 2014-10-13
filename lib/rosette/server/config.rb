@@ -2,15 +2,9 @@
 
 module Rosette
   module Server
-
     class << self
-      attr_reader :configuration
+      attr_accessor :configuration
 
-      def configure
-        @configuration ||= Rosette::Core::Configurator.new
-        yield @configuration
-      end
     end
-
   end
 end
