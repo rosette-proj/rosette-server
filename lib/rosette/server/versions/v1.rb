@@ -175,9 +175,9 @@ module Rosette
         end
 
         desc 'Associates a translation with the key or meta key given'
-        get :add do
+        get :add_or_update do
           validate_and_execute(
-            AddTranslationCommand.new(Rosette::Server.configuration)
+            AddOrUpdateTranslationCommand.new(Rosette::Server.configuration)
               .set_repo_name(params[:repo_name])
               .set_key(params[:key])
               .set_meta_key(params[:meta_key])

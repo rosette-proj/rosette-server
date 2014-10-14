@@ -4,21 +4,21 @@ module Rosette
   module Server
     module Commands
 
-      autoload :CommitCommand,         'rosette/server/commands/git/commit_command'
-      autoload :DiffBaseCommand,       'rosette/server/commands/git/diff_base_command'
-      autoload :DiffCommand,           'rosette/server/commands/git/diff_command'
-      autoload :ShowCommand,           'rosette/server/commands/git/show_command'
-      autoload :SnapshotCommand,       'rosette/server/commands/git/snapshot_command'
-      autoload :RepoSnapshotCommand,   'rosette/server/commands/git/repo_snapshot_command'
+      autoload :CommitCommand,                 'rosette/server/commands/git/commit_command'
+      autoload :DiffBaseCommand,               'rosette/server/commands/git/diff_base_command'
+      autoload :DiffCommand,                   'rosette/server/commands/git/diff_command'
+      autoload :ShowCommand,                   'rosette/server/commands/git/show_command'
+      autoload :SnapshotCommand,               'rosette/server/commands/git/snapshot_command'
+      autoload :RepoSnapshotCommand,           'rosette/server/commands/git/repo_snapshot_command'
 
-      autoload :AddTranslationCommand, 'rosette/server/commands/translations/add_translation_command'
-      autoload :ExportCommand,         'rosette/server/commands/translations/export_command'
+      autoload :AddOrUpdateTranslationCommand, 'rosette/server/commands/translations/add_or_update_translation_command'
+      autoload :ExportCommand,                 'rosette/server/commands/translations/export_command'
 
-      autoload :WithRepoName,          'rosette/server/commands/git/with_repo_name'
-      autoload :WithRef,               'rosette/server/commands/git/with_ref'
-      autoload :WithSnapshots,         'rosette/server/commands/git/with_snapshots'
-      autoload :DiffEntry,             'rosette/server/commands/git/diff_entry'
-      autoload :WithLocale,            'rosette/server/commands/translations/with_locale'
+      autoload :WithRepoName,                  'rosette/server/commands/git/with_repo_name'
+      autoload :WithRef,                       'rosette/server/commands/git/with_ref'
+      autoload :WithSnapshots,                 'rosette/server/commands/git/with_snapshots'
+      autoload :DiffEntry,                     'rosette/server/commands/git/diff_entry'
+      autoload :WithLocale,                    'rosette/server/commands/translations/with_locale'
 
       class Command
         attr_reader :configuration

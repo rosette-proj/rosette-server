@@ -4,7 +4,7 @@ module Rosette
   module Server
     module Commands
 
-      class AddTranslationCommand < GitCommand
+      class AddOrUpdateTranslationCommand < GitCommand
         attr_reader :key, :meta_key, :translation, :locale
 
         include WithRepoName
