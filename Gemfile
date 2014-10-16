@@ -21,7 +21,6 @@ group :development, :test do
   gem 'pry', '~> 0.9.0'
   gem 'pry-nav'
   gem 'rake'
-  gem 'threaded'
 end
 
 group :test do
