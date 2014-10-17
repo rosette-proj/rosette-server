@@ -4,7 +4,7 @@ gemspec
 
 ruby '2.0.0', engine: 'jruby', engine_version: '1.7.15'
 
-gem 'grape', github: 'intridea/grape'
+gem 'grape', '~> 0.9.0'
 
 # eventually add these as dependencies in gemspec
 gem 'rosette-core', '~> 1.0.0', path: '~/workspace/rosette-core'

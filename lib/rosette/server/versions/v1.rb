@@ -6,8 +6,6 @@ require 'shellwords'
 
 require 'rosette/server/version'
 require 'rosette/server/config'
-require 'rosette/server/queues'
-require 'rosette/server/data_stores'
 require 'rosette/server/tools'
 require 'rosette/server/commands'
 
