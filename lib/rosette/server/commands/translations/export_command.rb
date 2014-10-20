@@ -43,11 +43,14 @@ module Rosette
         def execute
           stream = StringIO.new
           repo_config = get_repo(repo_name)
-          serializer_instance = get_serializer_instance(repo_config, stream)
+          serializer_config = get_serializer_config(repo_config)
+          serializer_instance = serializer_config.klass.new(stream, encoding)
           snapshot = take_snapshot(repo_config.repo, commit_id)
           translation_count = 0
 
           each_translation(repo_config, snapshot) do |trans|
+            trans = apply_preprocessors(trans, serializer_config)
+
             serializer_instance.write_key_value(
               trans.phrase.index_value, trans.translation
             )
@@ -74,6 +77,12 @@ module Rosette
 
         private
 
+        def apply_preprocessors(translation, serializer_config)
+          serializer_config.preprocessors.inject(translation) do |trans, preprocessor|
+            preprocessor.process(trans)
+          end
+        end
+
         def encode(string)
           if base_64_encode
             Base64.encode64(string)
@@ -82,9 +91,8 @@ module Rosette
           end
         end
 
-        def get_serializer_instance(repo_config, stream)
-          serializer_config = repo_config.get_serializer_config(serializer)
-          serializer_config.klass.new(stream, encoding)
+        def get_serializer_config(repo_config)
+          repo_config.get_serializer_config(serializer)
         end
 
         def each_translation(repo_config, snapshot)
