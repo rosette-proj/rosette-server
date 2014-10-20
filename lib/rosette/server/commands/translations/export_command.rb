@@ -55,7 +55,7 @@ module Rosette
             translation_count += 1
           end
 
-          serializer_instance.close
+          serializer_instance.flush
 
           params = {
             payload: encode(stream.string),
