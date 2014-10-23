@@ -140,7 +140,7 @@ module Rosette
           requires :ref, type: String, present: true
         end
 
-        desc 'Returns the commit ids for the most recent changes for each file in the repository'
+        desc 'Returns the translations for the most recent changes for each file in the repository'
         get :snapshot do
           validate_and_execute(
             SnapshotCommand.new(Rosette::Server.configuration)
