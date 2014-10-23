@@ -11,15 +11,13 @@ module Rosette
 
         def execute
           repo = get_repo(repo_name).repo
-          rev = repo.get_rev_commit(commit_id)
-          parent_commit_ids = repo.parent_ids_of(rev)
+
           child_phrases = datastore.phrases_by_commit(repo_name, commit_id)
           paths = child_phrases.map(&:file).uniq
 
-          # hopefully the number of parents will only be one or two
-          parent_phrases = parent_commit_ids.flat_map do |parent_commit_id|
-            datastore.phrases_by_commits(repo_name, take_snapshot(repo, parent_commit_id, paths)).to_a
-          end
+          parent_commit = repo.find_first_non_merge_parent(commit_id)
+          parent_snapshot = take_snapshot(repo, parent_commit.getId.name, paths)
+          parent_phrases = datastore.phrases_by_commits(repo_name, parent_snapshot).to_a
 
           compare(child_phrases, parent_phrases)
         end
