@@ -92,7 +92,14 @@ module Rosette
               .set_repo_name(params[:repo_name])
               .set_commit_id(params[:ref])
           )
-          {}
+
+          validate_and_execute(
+            ShowCommand.new(Rosette::Server.configuration)
+              .set_repo_name(params[:repo_name])
+              .set_commit_id(params[:ref])
+          ).each_with_object({}) do |(state, phrases), ret|
+            ret[state] = phrases.size
+          end
         end
 
         #### SHOW ####
