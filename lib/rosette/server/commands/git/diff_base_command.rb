@@ -10,6 +10,15 @@ module Rosette
 
         include WithSnapshots
 
+        def ensure_commits_have_been_processed(snapshot)
+          snapshot.each_pair do |file, commit_id|
+            unless datastore.commit_log_exists?(repo_name, commit_id)
+              raise Errors::UnprocessedCommitError,
+                "Commit #{commit_id} has not been processed yet."
+            end
+          end
+        end
+
         def compare(head_phrases, diff_point_phrases)
           partitioned_head_phrases = partition_phrases(head_phrases)
           partitioned_diff_point_phrases = partition_phrases(diff_point_phrases)

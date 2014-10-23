@@ -38,15 +38,13 @@ module Rosette
           repo = get_repo(repo_name).repo
           entries = repo.diff(head_commit_id, diff_point_commit_id, paths)
 
-          head_phrases = datastore.phrases_by_commits(
-            repo_name,
-            take_snapshot(repo, head_commit_id, entries.map(&:getNewPath))
-          )
+          head_snapshot = take_snapshot(repo, head_commit_id, entries.map(&:getNewPath))
+          ensure_commits_have_been_processed(head_snapshot)
+          head_phrases = datastore.phrases_by_commits(repo_name, head_snapshot)
 
-          diff_point_phrases = datastore.phrases_by_commits(
-            repo_name,
-            take_snapshot(repo, diff_point_commit_id, entries.map(&:getOldPath))
-          )
+          diff_point_snapshot = take_snapshot(repo, diff_point_commit_id, entries.map(&:getOldPath))
+          ensure_commits_have_been_processed(diff_point_snapshot)
+          diff_point_phrases = datastore.phrases_by_commits(repo_name, diff_point_snapshot)
 
           compare(head_phrases, diff_point_phrases)
         end
