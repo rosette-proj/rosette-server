@@ -39,8 +39,15 @@ module Rosette
               error!({ error: 'unexpected error', detail: e.message }, 500)
             end
           else
-            param, messages = command.messages.first
-            raise Grape::Exceptions::Validation, param: param, message: messages.first
+            errors = command.messages.flat_map do |(field, messages)|
+              messages.map do |message|
+                Grape::Exceptions::Validation.new(
+                  params: { status: 400, message: "#{field}: #{message}" }
+                )
+              end
+            end
+
+            raise Grape::Exceptions::ValidationErrors.new(errors: errors)
           end
         end
       end
