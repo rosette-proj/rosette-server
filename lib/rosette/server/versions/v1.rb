@@ -19,7 +19,9 @@ module Rosette
       class Present < Grape::Validations::Validator
         def validate_param!(attr_name, params)
           if (params[attr_name] || '').strip.blank?
-            raise Grape::Exceptions::Validation, param: @scope.full_name(attr_name), message: 'must not be blank'
+            raise Grape::Exceptions::Validation, {
+              param: @scope.full_name(attr_name), message: 'must not be blank'
+            }
           end
         end
       end
