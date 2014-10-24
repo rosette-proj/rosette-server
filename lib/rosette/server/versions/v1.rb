@@ -68,6 +68,10 @@ module Rosette
         end
       end
 
+      get :alive do
+        true
+      end
+
       get :env do
         ENV.to_h
       end
