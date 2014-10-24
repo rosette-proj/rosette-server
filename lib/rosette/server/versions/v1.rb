@@ -125,6 +125,31 @@ module Rosette
           end
         end
 
+        #### STATUS ####
+
+        params do
+          requires :repo_name, type: String
+          requires :ref, type: String, present: true
+        end
+
+        desc 'Translation progress for a given commit'
+        get :status do
+          status = validate_and_execute(
+            StatusCommand.new(Rosette::Server.configuration)
+              .set_repo_name(params[:repo_name])
+              .set_ref(params[:ref])
+          )
+
+          if status
+            status
+          else
+            error!({
+              error: 'Commit not processed',
+              detail: "Commit #{params[:ref]} hasn't been processed yet"
+            }, 500)
+          end
+        end
+
         #### DIFF ####
 
         params do
