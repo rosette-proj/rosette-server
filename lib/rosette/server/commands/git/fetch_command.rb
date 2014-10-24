@@ -8,7 +8,7 @@ module Rosette
         include WithRepoName
 
         def execute
-          get_repo(repo_name).fetch
+          get_repo(repo_name).repo.fetch
         end
       end
 
