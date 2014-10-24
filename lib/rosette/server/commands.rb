@@ -8,6 +8,7 @@ module Rosette
       autoload :DiffBaseCommand,               'rosette/server/commands/git/diff_base_command'
       autoload :DiffCommand,                   'rosette/server/commands/git/diff_command'
       autoload :ShowCommand,                   'rosette/server/commands/git/show_command'
+      autoload :FetchCommand,                  'rosette/server/commands/git/fetch_command'
       autoload :SnapshotCommand,               'rosette/server/commands/git/snapshot_command'
       autoload :RepoSnapshotCommand,           'rosette/server/commands/git/repo_snapshot_command'
 

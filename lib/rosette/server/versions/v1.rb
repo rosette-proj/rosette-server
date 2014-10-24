@@ -88,6 +88,11 @@ module Rosette
         desc 'Extract phrases from a commit and store them in the datastore.'
         get :commit do
           validate_and_execute(
+            FetchCommand.new(Rosette::Server.configuration)
+              .set_repo_name(params[:repo_name])
+          )
+
+          validate_and_execute(
             CommitCommand.new(Rosette::Server.configuration)
               .set_repo_name(params[:repo_name])
               .set_commit_id(params[:ref])
