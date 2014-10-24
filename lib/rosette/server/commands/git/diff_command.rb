@@ -5,33 +5,50 @@ module Rosette
     module Commands
 
       class DiffCommand < DiffBaseCommand
-        attr_reader :head_commit_id, :diff_point_commit_id, :paths
+        attr_reader :head_commit_str, :diff_point_commit_str, :paths
 
         include WithRepoName
 
+        validate :head_commit_str, type: :commit
+        validate :diff_point_commit_str, type: :commit
+
         def set_head_commit_id(head_commit_id)
-          @head_commit_id = head_commit_id
+          @head_commit_str = head_commit_id
           self
         end
 
         def set_head_ref(head_ref)
-          @head_commit_id = get_repo(repo_name).repo.get_rev_commit(head_ref).getId.name
+          @head_commit_str = head_ref
           self
         end
 
         def set_diff_point_commit_id(diff_point_commit_id)
-          @diff_point_commit_id = diff_point_commit_id
+          @diff_point_commit_str = diff_point_commit_id
           self
         end
 
         def set_diff_point_ref(diff_point_ref)
-          @diff_point_commit_id = get_repo(repo_name).repo.get_rev_commit(diff_point_ref).getId.name
+          @diff_point_commit_str = diff_point_ref
           self
         end
 
         def set_paths(paths)
           @paths = paths
           self
+        end
+
+        def head_commit_id
+          @head_commit_id ||= get_repo(repo_name)
+            .repo.get_rev_commit(head_commit_str)
+            .getId
+            .name
+        end
+
+        def diff_point_commit_id
+          @diff_point_commit_id ||= get_repo(repo_name)
+            .repo.get_rev_commit(diff_point_commit_str)
+            .getId
+            .name
         end
 
         def execute
