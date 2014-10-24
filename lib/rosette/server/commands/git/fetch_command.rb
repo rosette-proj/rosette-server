@@ -4,7 +4,7 @@ module Rosette
   module Server
     module Commands
 
-      class FetchCommand < Command
+      class FetchCommand < GitCommand
         include WithRepoName
 
         def execute
