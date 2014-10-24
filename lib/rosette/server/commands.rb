@@ -18,6 +18,7 @@ module Rosette
 
       autoload :WithRepoName,                  'rosette/server/commands/git/with_repo_name'
       autoload :WithRef,                       'rosette/server/commands/git/with_ref'
+      autoload :WithNonMergeRef,               'rosette/server/commands/git/with_non_merge_ref'
       autoload :WithSnapshots,                 'rosette/server/commands/git/with_snapshots'
       autoload :DiffEntry,                     'rosette/server/commands/git/diff_entry'
       autoload :WithLocale,                    'rosette/server/commands/translations/with_locale'
@@ -27,29 +28,26 @@ module Rosette
 
         class << self
           def validate(field, validator_hash)
-            validators[field] = instantiate_validators(validator_hash)
+            validators[field] << instantiate_validator(validator_hash)
           end
 
           def validators
-            @validators ||= {}
+            @validators ||= Hash.new { |hash, key| hash[key] = [] }
           end
 
           private
 
-          def instantiate_validators(validator_hash)
-            validator_hash.each_with_object([]) do |(validator_name, enabled), ret|
-              if enabled
-                ret << validator_class_for(validator_name).new
-              end
-            end
+          def instantiate_validator(validator_hash)
+            validator_type = validator_hash.fetch(:type)
+            validator_class_for(validator_type).new(validator_hash)
           end
 
-          def validator_class_for(validator_name)
-            klass = "#{Rosette::Core::StringUtils.camelize(validator_name.to_s)}Validator"
+          def validator_class_for(validator_type)
+            klass = "#{Rosette::Core::StringUtils.camelize(validator_type.to_s)}Validator"
             if Rosette::Core::Validators.const_defined?(klass)
               Rosette::Core::Validators.const_get(klass)
             else
-              raise TypeError, "couldn't find #{validator_name} validator"
+              raise TypeError, "couldn't find #{validator_type} validator"
             end
           end
         end

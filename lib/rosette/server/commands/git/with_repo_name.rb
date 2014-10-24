@@ -8,7 +8,9 @@ module Rosette
         attr_reader :repo_name
 
         def self.included(base)
-          base.validate :repo_name, repo: true
+          if base.respond_to?(:validate)
+            base.validate :repo_name, type: :repo
+          end
         end
 
         def set_repo_name(repo_name)

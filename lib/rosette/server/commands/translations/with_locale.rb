@@ -8,7 +8,7 @@ module Rosette
         attr_reader :locale
 
         def self.included(base)
-          base.validate :locale, locale: true
+          base.validate :locale, type: :locale
         end
 
         def set_locale(locale_code)

@@ -8,7 +8,9 @@ module Rosette
         attr_reader :commit_str
 
         def self.included(base)
-          base.validate :commit_str, commit: true
+          if base.respond_to?(:validate)
+            base.validate :commit_str, type: :commit
+          end
         end
 
         def set_ref(ref_str)
