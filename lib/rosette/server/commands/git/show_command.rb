@@ -7,7 +7,7 @@ module Rosette
       # A show is really just a diff with your parent
       class ShowCommand < DiffBaseCommand
         include WithRepoName
-        include WithRef
+        include WithNonMergeRef
 
         def execute
           repo = get_repo(repo_name).repo
