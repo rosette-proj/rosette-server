@@ -12,7 +12,8 @@ module Rosette
         def execute
           repo = get_repo(repo_name).repo
 
-          child_phrases = datastore.phrases_by_commit(repo_name, commit_id)
+          child_snapshot = take_snapshot(repo, commit_id)
+          child_phrases = datastore.phrases_by_commits(repo_name, child_snapshot).to_a
           paths = child_phrases.map(&:file).uniq
 
           parent_commit = repo.find_first_non_merge_parent(commit_id)
