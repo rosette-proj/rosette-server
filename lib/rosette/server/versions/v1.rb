@@ -72,10 +72,12 @@ module Rosette
         true
       end
 
+      # @TODO: remove
       get :env do
         ENV.to_h
       end
 
+      # @TODO: remove
       get :property do
         [System.getProperty(params[:prop])]
       end
