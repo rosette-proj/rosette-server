@@ -15,10 +15,6 @@ module Rosette
       include Rosette::Server::Commands
       logger Rosette.logger
 
-      def configuration
-        self.class.configuration
-      end
-
       def self.configuration
         @configuration
       end
@@ -39,6 +35,10 @@ module Rosette
       end
 
       helpers do
+        def configuration
+          V1.configuration
+        end
+
         def logger
           V1.logger
         end
@@ -72,8 +72,7 @@ module Rosette
       resource :extractors do
         desc 'List configured extractors'
         get :list do
-          Rosette::Server
-            .configuration
+          configuration
             .repo_configs.each_with_object({}) do |config, ret|
               ret[config.name] = config.extractor_configs.map { |config| config.extractor.class.to_s }
             end
