@@ -15,7 +15,16 @@ module Rosette
       include Rosette::Server::Commands
       logger Rosette.logger
 
+      def configuration
+        self.class.configuration
+      end
+
+      def self.configuration
+        @configuration
+      end
+
       def self.set_configuration(configuration)
+        @configuration = configuration
         configuration.apply_integrations(self)
       end
 
@@ -105,18 +114,18 @@ module Rosette
         desc 'Extract phrases from a commit and store them in the datastore.'
         get :commit do
           validate_and_execute(
-            FetchCommand.new(Rosette::Server.configuration)
+            FetchCommand.new(configuration)
               .set_repo_name(params[:repo_name])
           )
 
           validate_and_execute(
-            CommitCommand.new(Rosette::Server.configuration)
+            CommitCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_commit_id(params[:ref])
           )
 
           validate_and_execute(
-            ShowCommand.new(Rosette::Server.configuration)
+            ShowCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_commit_id(params[:ref])
           ).each_with_object({}) do |(state, phrases), ret|
@@ -134,7 +143,7 @@ module Rosette
         desc 'List the phrases contained in a commit'
         get :show do
           validate_and_execute(
-            ShowCommand.new(Rosette::Server.configuration)
+            ShowCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
           ).each_with_object({}) do |(state, phrases), ret|
@@ -152,7 +161,7 @@ module Rosette
         desc 'Translation progress for a given commit'
         get :status do
           status = validate_and_execute(
-            StatusCommand.new(Rosette::Server.configuration)
+            StatusCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
           )
@@ -179,7 +188,7 @@ module Rosette
         desc 'List phrases added/removed/changed between two commits'
         get :diff do
           validate_and_execute(
-            DiffCommand.new(Rosette::Server.configuration)
+            DiffCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_head_ref(params[:head_ref])
               .set_diff_point_ref(params[:diff_point_ref])
@@ -199,7 +208,7 @@ module Rosette
         desc 'Returns the translations for the most recent changes for each file in the repository'
         get :snapshot do
           validate_and_execute(
-            SnapshotCommand.new(Rosette::Server.configuration)
+            SnapshotCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
           ).map(&:to_h)
@@ -215,7 +224,7 @@ module Rosette
         desc 'Returns the commit ids for the most recent changes for each file in the repository'
         get :repo_snapshot do
           validate_and_execute(
-            RepoSnapshotCommand.new(Rosette::Server.configuration)
+            RepoSnapshotCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
           )
@@ -238,7 +247,7 @@ module Rosette
         desc 'Associates a translation with the key or meta key given'
         get :add_or_update do
           validate_and_execute(
-            AddOrUpdateTranslationCommand.new(Rosette::Server.configuration)
+            AddOrUpdateTranslationCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_key(params[:key])
               .set_meta_key(params[:meta_key])
@@ -263,7 +272,7 @@ module Rosette
         desc 'Retrieve and serialize the phrases and translations for a given ref'
         get :export do
           validate_and_execute(
-            ExportCommand.new(Rosette::Server.configuration)
+            ExportCommand.new(configuration)
               .set_repo_name(params[:repo_name])
               .set_ref(params[:ref])
               .set_locale(params[:locale])
