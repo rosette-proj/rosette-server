@@ -71,6 +71,14 @@ module Rosette
         end
       end
 
+      get :expected_error do
+        error!({ error: 'Expected jelly bean error' }, 500)
+      end
+
+      get :unexpected_error do
+        raise 'Unexpected jelly bean error'
+      end
+
       get :alive do
         true
       end
