@@ -5,7 +5,6 @@ java_import java.lang.System
 require 'shellwords'
 
 require 'rosette/server/version'
-require 'rosette/server/config'
 require 'rosette/server/tools'
 require 'rosette/server/commands'
 
@@ -15,6 +14,10 @@ module Rosette
     class V1 < Grape::API
       include Rosette::Server::Commands
       logger Rosette.logger
+
+      def self.set_configuration(configuration)
+        configuration.apply_integrations(self)
+      end
 
       class Present < Grape::Validations::Validator
         def validate_param!(attr_name, params)
