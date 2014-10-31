@@ -14,7 +14,7 @@ module Rosette
           end
 
           datastore.add_or_update_commit_log(repo_name, commit_id)
-          trigger_hooks
+          trigger_hooks(:after)
         end
 
         private
@@ -23,9 +23,9 @@ module Rosette
           @commit_processor ||= Rosette::Core::CommitProcessor.new(configuration)
         end
 
-        def trigger_hooks
+        def trigger_hooks(stage)
           repo_config = get_repo(repo_name)
-          repo_config.hooks.fetch(:commit, []).each do |hook_proc|
+          repo_config.hooks.fetch(stage, {}).fetch(:commit, []).each do |hook_proc|
             hook_proc.call(configuration, repo_config, commit_id)
           end
         end
