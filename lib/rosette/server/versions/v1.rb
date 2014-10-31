@@ -37,15 +37,11 @@ module Rosette
           if command.valid?
             command.execute
           else
-            errors = command.messages.flat_map do |(field, messages)|
-              messages.map do |message|
-                Grape::Exceptions::Validation.new(
-                  params: { status: 400, message: "#{field}: #{message}" }
-                )
-              end
+            errors = command.messages.flat_map do |field, messages|
+              messages
             end
 
-            raise Grape::Exceptions::ValidationErrors.new(errors: errors)
+            error!({ error: errors.first }, 400)
           end
         end
       end
