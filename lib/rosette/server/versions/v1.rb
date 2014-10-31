@@ -86,7 +86,7 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :ref, type: String, present: true
+          requires :ref, type: String, presence: true
         end
 
         # eventually add commits to a queue
@@ -116,7 +116,7 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :ref, type: String, present: true
+          requires :ref, type: String, presence: true
         end
 
         desc 'List the phrases contained in a commit'
@@ -134,7 +134,7 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :ref, type: String, present: true
+          requires :ref, type: String, presence: true
         end
 
         desc 'Translation progress for a given commit'
@@ -159,8 +159,8 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :head_ref, type: String, present: true
-          requires :diff_point_ref, type: String, present: true
+          requires :head_ref, type: String, presence: true
+          requires :diff_point_ref, type: String, presence: true
           optional :paths, type: String
         end
 
@@ -181,7 +181,7 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :ref, type: String, present: true
+          requires :ref, type: String, presence: true
         end
 
         desc 'Returns the translations for the most recent changes for each file in the repository'
@@ -197,7 +197,7 @@ module Rosette
 
         params do
           requires :repo_name, type: String
-          requires :ref, type: String, present: true
+          requires :ref, type: String, presence: true
         end
 
         desc 'Returns the commit ids for the most recent changes for each file in the repository'
@@ -216,7 +216,7 @@ module Rosette
         params do
           requires :repo_name, type: String
           requires :translation, type: String
-          requires :locale, type: String, present: true
+          requires :locale, type: String, presence: true
           optional :key, type: String
           optional :meta_key, type: String
           requires :ref, type: String
@@ -242,7 +242,7 @@ module Rosette
         params do
           requires :repo_name, type: String
           requires :ref, type: String
-          requires :locale, type: String, present: true
+          requires :locale, type: String, presence: true
           requires :serializer, type: String
           optional :base_64_encode, type: Boolean
           optional :include_snapshot, type: Boolean
