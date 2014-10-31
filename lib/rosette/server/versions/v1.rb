@@ -35,13 +35,7 @@ module Rosette
 
         def validate_and_execute(command)
           if command.valid?
-            begin
-              command.execute
-            rescue => e
-              logger.error("Error occured during command #{command}: #{e.message}")
-              logger.error(e.backtrace.join("\n"))
-              error!({ error: 'unexpected error', detail: e.message }, 500)
-            end
+            command.execute
           else
             errors = command.messages.flat_map do |(field, messages)|
               messages.map do |message|
