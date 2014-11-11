@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 java_import java.lang.System
+java_import 'java.net.URLClassLoader'
 
 require 'shellwords'
 
@@ -82,7 +83,7 @@ module Rosette
       end
 
       get :classpath do
-        JBUNDLER_CLASSPATH
+        URLClassLoader.getSystemClassLoader.getURLs.map(&:getFile)
       end
 
       resource :git do
