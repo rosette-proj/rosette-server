@@ -82,10 +82,6 @@ module Rosette
         [System.getProperty(params[:prop])]
       end
 
-      get :classpath do
-        URLClassLoader.getSystemClassLoader.getURLs.map(&:getFile)
-      end
-
       resource :git do
         #### COMMIT ####
 
