@@ -81,6 +81,10 @@ module Rosette
         [System.getProperty(params[:prop])]
       end
 
+      get :classpath do
+        JBUNDLER_CLASSPATH
+      end
+
       resource :git do
         #### COMMIT ####
 
