@@ -1,18 +1,19 @@
 # encoding: UTF-8
 
 java_import java.lang.System
+java_import 'java.net.URLClassLoader'
 
 require 'shellwords'
 
+require 'rosette/core'
 require 'rosette/server/version'
 require 'rosette/server/tools'
-require 'rosette/server/commands'
 
 module Rosette
   module Server
 
     class V1 < Grape::API
-      include Rosette::Server::Commands
+      include Rosette::Core::Commands
       logger Rosette.logger
 
       def self.configuration
