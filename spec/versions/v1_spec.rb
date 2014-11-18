@@ -9,6 +9,7 @@ describe Rosette::Server::V1 do
   let(:ref) { repo.git("log -1 --pretty=%H").chomp }
   let(:yaml_path) { 'test.yml' }
   let(:locales) { %w(en-US de-DE es) }
+  let(:bogus_ref) { 'bogusref' }
 
   let(:configuration) do
     Rosette.build_config do |config|
@@ -18,9 +19,11 @@ describe Rosette::Server::V1 do
         repo_config.set_path(File.join(repo.working_dir, '/.git'))
 
         repo_config.add_extractor('yaml/rails') do |ext|
-          ext.match_file_extension('.yml').and(
-            ext.match_path(yaml_path)
-          )
+          ext.set_conditions do |cond|
+            cond.match_file_extension('.yml').and(
+              cond.match_path(yaml_path)
+            )
+          end
         end
       end
     end
@@ -39,14 +42,14 @@ describe Rosette::Server::V1 do
     repo.commit("here is a commit message")
 
     # Can't fetch b/c there is no origin...probably a better way to do this
-    allow_any_instance_of(Rosette::Server::Commands::FetchCommand).to receive(:execute) { double('execute') }
+    allow_any_instance_of(Rosette::Core::Commands::FetchCommand).to receive(:execute) { double('execute') }
   end
 
   shared_examples 'a malformed request' do
     subject { get(path, params) }
 
-    it 'raises an error' do
-      expect {subject }.to raise_error(RuntimeError, /Params are missing:/)
+    it 'returns a 400' do
+      expect(subject.status).to eq(400)
     end
   end
 
@@ -68,7 +71,7 @@ describe Rosette::Server::V1 do
 
     describe 'GET /v1/git/commit' do
       let(:path) { '/v1/git/commit' }
-      let(:params) { { repo_name: repo_name, ref: nil } }
+      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
 
       it_should_behave_like 'a malformed request'
 
@@ -87,7 +90,7 @@ describe Rosette::Server::V1 do
 
     describe 'GET /v1/git/show' do
       let(:path) { '/v1/git/show' }
-      let(:params) { { repo_name: repo_name, ref: nil } }
+      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
 
       it_should_behave_like 'a malformed request'
 
@@ -113,7 +116,7 @@ describe Rosette::Server::V1 do
 
     describe 'GET /v1/git/status' do
       let(:path) { '/v1/git/status' }
-      let(:params) { { repo_name: repo_name, ref: nil } }
+      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
 
       it_should_behave_like 'a malformed request'
 
@@ -162,7 +165,7 @@ describe Rosette::Server::V1 do
         let(:key) { nil }
 
         it 'raises an error' do
-          expect(subject['error']).to match(/key, meta_key are missing/)
+          expect { subject }.to raise_error(Rosette::DataStores::Errors::PhraseNotFoundError)
         end
       end
 
