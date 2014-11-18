@@ -19,10 +19,20 @@ module Rosette
           commit_count = repo.commit_count
 
           repo.each_commit.with_index do |rev_commit, idx|
+            phrase_counter = 0
+
             commit_processor.process_each_phrase(repo_name, rev_commit.getId.name) do |phrase|
               yield phrase if block_given?
+              phrase_counter += 1
               datastore.store_phrase(repo_name, phrase)
             end
+
+            datastore.add_or_update_commit_log(
+              repo_name, rev_commit.getId.name,
+              Time.at(rev_commit.getCommitTime),
+              Rosette::DataStores::PhraseStatus::UNTRANSLATED,
+              phrase_counter
+            )
 
             progress_reporter.report_progress(idx + 1, commit_count)
           end
