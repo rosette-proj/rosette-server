@@ -179,19 +179,46 @@ describe Rosette::Server::V1 do
       end
 
       context 'when a key is present and a meta_key is not' do
-        it 'does something cool' do
+        let(:meta_key) { nil }
+
+        it 'adds the correct translation' do
           subject
+          translation_entry = translation_model.first
+          expect(translation_entry.locale).to eq(locale)
+          expect(translation_entry.translation).to eq(translation)
         end
       end
 
       context 'when a meta_key is present and a key is not' do
+        let(:key) { nil }
 
+        it 'adds the correct translation' do
+          subject
+          translation_entry = translation_model.first
+          expect(translation_entry.locale).to eq(locale)
+          expect(translation_entry.translation).to eq(translation)
+        end
+      end
+
+      context 'when both key and meta_key are present' do
+
+        it 'adds the correct translation' do
+          subject
+          translation_entry = translation_model.first
+          expect(translation_entry.locale).to eq(locale)
+          expect(translation_entry.translation).to eq(translation)
+          binding.pry
+        end
       end
     end
   end
 
   def phrase_model
     Rosette::DataStores::InMemoryDataStore::Phrase
+  end
+
+  def translation_model
+    Rosette::DataStores::InMemoryDataStore::Translation
   end
 
 
