@@ -20,6 +20,8 @@ gem 'yaml-write-stream', path: '~/workspace/yaml-write-stream'
 gem 'commonjs-rhino', path: '~/workspace/commonjs-rhino'
 gem 'puma'
 
+gem 'concurrent-ruby', '~> 0.7.0'
+
 group :development, :test do
   gem 'jbundler'
   gem 'pry', '~> 0.9.0'
