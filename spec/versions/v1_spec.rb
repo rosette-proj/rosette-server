@@ -207,7 +207,6 @@ describe Rosette::Server::V1 do
           translation_entry = translation_model.first
           expect(translation_entry.locale).to eq(locale)
           expect(translation_entry.translation).to eq(translation)
-          binding.pry
         end
       end
     end
