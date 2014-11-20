@@ -8,7 +8,7 @@ gem 'grape', '~> 0.9.0'
 
 # eventually add these as dependencies in gemspec
 gem 'rosette-core', '~> 1.0.0', path: '~/workspace/rosette-core'
-gem 'activerecord', '~> 4.0.0'
+gem 'activerecord', '~> 3.2.0'
 gem 'activerecord-jdbcmysql-adapter', '~> 1.3.0'
 
 gem 'rosette-extractor-rb', path: '~/workspace/rosette-extractor-rb'
