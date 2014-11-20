@@ -133,8 +133,22 @@ describe Rosette::Server::V1 do
       context 'with required parameters present' do
         let(:params) { { repo_name: repo_name, ref: ref } }
 
-        it 'gives the translation progress for a given commit' do
-          # binding.pry
+        it 'indicates that the commit has not been processed' do
+          expect(subject['detail']).to eq("Commit #{ref} hasn't been processed yet")
+        end
+
+        context 'commit has been processed' do
+          before do
+            get('/v1/git/commit', { repo_name: repo_name, ref: ref } )
+          end
+
+          it 'gives the status of that commit' do
+            subject
+            expect(subject['locales'].count).to eq(locales.count)
+            expect(subject['status']).to eq(Rosette::DataStores::PhraseStatus::UNTRANSLATED)
+            expect(subject['commit_id']).to eq(ref)
+          end
+
         end
       end
 
