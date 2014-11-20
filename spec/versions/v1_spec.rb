@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'pry'
+require 'yaml/store'
 
 describe Rosette::Server::V1 do
   include Rack::Test::Methods
@@ -9,7 +9,9 @@ describe Rosette::Server::V1 do
   let(:ref) { repo.git("log -1 --pretty=%H").chomp }
   let(:yaml_path) { 'test.yml' }
   let(:locales) { %w(en-US de-DE es) }
-  let(:bogus_ref) { 'bogusref' }
+  let(:bogus_ref) { Faker::Lorem.characters(40) }
+  let(:key) { Faker::Lorem.sentence }
+  let(:meta_key) { Faker::Lorem.word }
 
   let(:configuration) do
     Rosette.build_config do |config|
@@ -35,9 +37,15 @@ describe Rosette::Server::V1 do
 
   before do
     Rosette::Server::V1.set_configuration(configuration)
-    repo.create_file(yaml_path) do |f|
-      f.write("en:\n  test: Here is a test string\n") # FIXME use YamlStore
+
+    file = repo.create_file(yaml_path)
+
+    YAML::Store.new(file.path).tap do |store|
+      store.transaction do
+        store['en'] = { meta_key => key }
+      end
     end
+
     repo.add_all
     repo.commit("here is a commit message")
 
@@ -83,7 +91,7 @@ describe Rosette::Server::V1 do
           phrase = phrase_model.first
           expect(phrase_model.count).to eq(1)
           expect(phrase.commit_id).to eq(ref)
-          expect(phrase.key).to eq("Here is a test string")
+          expect(phrase.key).to eq(key)
         end
       end
     end
@@ -108,7 +116,7 @@ describe Rosette::Server::V1 do
         end
 
         it 'lists the phrases added in the commit' do
-          expect(subject['added'].first['key']).to eq('Here is a test string')
+          expect(subject['added'].first['key']).to eq(key)
         end
       end
 
@@ -139,16 +147,16 @@ describe Rosette::Server::V1 do
       let(:path) { '/v1/translations/add_or_update' }
 
       let(:locale) { 'de-DE' }
-      let(:key) { 'Here is a test string' }
-      let(:meta_key) { 'test' }
-      let(:translation) { 'Some German' }
+      let(:translation) { Faker::Lorem.sentence }
+      let(:key_param) { key }
+      let(:meta_key_param) { meta_key }
       let(:params) do
         {
           repo_name: repo_name,
           ref: ref,
           locale: locale,
-          key: key,
-          meta_key: meta_key,
+          key: key_param,
+          meta_key: meta_key_param,
           translation: translation
         }
       end
@@ -161,8 +169,8 @@ describe Rosette::Server::V1 do
       end
 
       context 'with both key and meta_key not present' do
-        let(:meta_key) { nil }
-        let(:key) { nil }
+        let(:meta_key_param) { nil }
+        let(:key_param) { nil }
 
         it 'raises an error' do
           expect { subject }.to raise_error(Rosette::DataStores::Errors::PhraseNotFoundError)
@@ -179,22 +187,22 @@ describe Rosette::Server::V1 do
       end
 
       context 'when a key is present and a meta_key is not' do
-        let(:meta_key) { nil }
+        let(:meta_key_param) { nil }
 
         it 'adds the correct translation' do
           subject
-          translation_entry = translation_model.first
+          translation_entry = translation_model.entries.last
           expect(translation_entry.locale).to eq(locale)
           expect(translation_entry.translation).to eq(translation)
         end
       end
 
       context 'when a meta_key is present and a key is not' do
-        let(:key) { nil }
+        let(:key_param) { nil }
 
         it 'adds the correct translation' do
           subject
-          translation_entry = translation_model.first
+          translation_entry = translation_model.entries.last
           expect(translation_entry.locale).to eq(locale)
           expect(translation_entry.translation).to eq(translation)
         end
@@ -204,7 +212,7 @@ describe Rosette::Server::V1 do
 
         it 'adds the correct translation' do
           subject
-          translation_entry = translation_model.first
+          translation_entry = translation_model.entries.last
           expect(translation_entry.locale).to eq(locale)
           expect(translation_entry.translation).to eq(translation)
         end

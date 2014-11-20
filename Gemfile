@@ -30,6 +30,7 @@ group :development, :test do
 end
 
 group :test do
+  gem 'faker'
   gem 'rack-test'
   gem 'rosette-datastore-memory', path: '~/workspace/rosette-datastore-memory'
   gem 'rspec'
