@@ -72,11 +72,6 @@ describe Rosette::Server::V1 do
 
   describe 'Git commands' do
 
-
-    before do
-
-    end
-
     describe 'GET /v1/git/commit' do
       let(:path) { '/v1/git/commit' }
       let(:params) { { repo_name: repo_name, ref: bogus_ref } }
@@ -151,7 +146,6 @@ describe Rosette::Server::V1 do
 
         end
       end
-
     end
 
   end
@@ -241,6 +235,4 @@ describe Rosette::Server::V1 do
   def translation_model
     Rosette::DataStores::InMemoryDataStore::Translation
   end
-
-
 end
