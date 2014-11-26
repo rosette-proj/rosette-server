@@ -7,7 +7,7 @@ module Rosette
       class RailsTranslationHistoryBuilder < TranslationHistoryBuilder
         protected
 
-        def deduce_locale(repo_config, commit_id, path)
+        def deduce_locale(repo_config, path)
           locale_str = File.basename(path).chomp(File.extname(path))
           if locale_obj = find_locale(repo_config, locale_str)
             locale_obj.code
