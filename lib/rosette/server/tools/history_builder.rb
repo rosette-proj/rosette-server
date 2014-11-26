@@ -8,6 +8,8 @@ module Rosette
 
       # Walks the commits in a repo and imports phrases for all of them.
       class HistoryBuilder
+        THREAD_POOL_SIZE = 10
+
         attr_reader :config, :repo_config
         attr_reader :error_reporter, :progress_reporter
 
@@ -20,7 +22,7 @@ module Rosette
 
         def execute
           commit_count = repo_config.repo.commit_count
-          pool = Concurrent::FixedThreadPool.new(10)
+          pool = Concurrent::FixedThreadPool.new(THREAD_POOL_SIZE)
 
           repo_config.repo.each_commit.with_index do |rev_commit, idx|
             pool << Proc.new { process_commit(rev_commit) }
