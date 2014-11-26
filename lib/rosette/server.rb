@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
 require 'grape'
-require 'rosette/server/errors'
 require 'rosette/server/versions/v1'
 
 class Server < Grape::API
