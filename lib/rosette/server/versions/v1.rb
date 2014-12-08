@@ -36,7 +36,12 @@ module Rosette
 
         def validate_and_execute(command)
           if command.valid?
-            command.execute
+            begin
+              command.execute
+            rescue => e
+              configuration.error_reporter.report_error(e)
+              error!({ error: e.message }, 400)
+            end
           else
             errors = command.messages.flat_map do |field, messages|
               messages
