@@ -39,7 +39,7 @@ module Rosette
             begin
               command.execute
             rescue => e
-              configuration.error_reporter.report_error(e)
+              configuration.error_reporter.report_error(e, get_extra_fields)
               error!({ error: e.message }, 400)
             end
           else
@@ -49,6 +49,16 @@ module Rosette
 
             error!({ error: errors.first }, 400)
           end
+        end
+
+        def get_extra_fields
+          { headers: headers, params: get_params }
+        end
+
+        def get_params
+          request.params.dup.tap { |hash| hash.delete('route_info') }.to_h
+        rescue NoMethodError
+          {}
         end
       end
 
