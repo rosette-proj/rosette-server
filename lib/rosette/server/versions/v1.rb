@@ -261,6 +261,7 @@ module Rosette
           requires :locale, type: String, presence: true
           requires :serializer, type: String
           optional :base_64_encode, type: Boolean
+          optional :encoding, type: String
           optional :include_snapshot, type: Boolean
         end
 
