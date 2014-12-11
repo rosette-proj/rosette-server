@@ -65,7 +65,7 @@ module Rosette
       version 'v1', using: :path
       format :json
 
-      resource :extractors do
+      resource :extractors, { desc: 'Information about configured extractors.' } do
         desc 'List configured extractors'
         get :list do
           configuration
@@ -75,38 +75,49 @@ module Rosette
         end
       end
 
-      get :expected_error do
-        error!({ error: 'Expected jelly bean error' }, 500)
-      end
-
-      get :unexpected_error do
-        raise 'Unexpected jelly bean error'
-      end
-
+      desc 'Health endpoint.'
       get :alive do
         true
       end
 
       # @TODO: remove
+      desc 'List configured environment variables. Will be removed soon.'
       get :env do
         ENV.to_h
       end
 
       # @TODO: remove
+      desc 'Show the value for a given java system property.'
+
+      params do
+        requires :prop, {
+          type: String,
+          desc: 'The name of the property to retrieve.'
+        }
+      end
+
       get :property do
         [System.getProperty(params[:prop])]
       end
 
-      resource :git do
+      resource :git, { desc: 'Perform various git-insipired operations on phrases and translations' } do
         #### COMMIT ####
 
+        desc 'Extract phrases from a commit and store them in the datastore.'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String, presence: true
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String, presence: true,
+            desc: 'The git ref to commit phrases from. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
         end
 
-        # eventually add commits to a queue
-        desc 'Extract phrases from a commit and store them in the datastore.'
         get :commit do
           validate_and_execute(
             FetchCommand.new(configuration)
@@ -130,12 +141,21 @@ module Rosette
 
         #### SHOW ####
 
+        desc 'List the phrases contained in a commit'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String, presence: true
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String, presence: true,
+            desc: 'The git ref to list phrases for. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
         end
 
-        desc 'List the phrases contained in a commit'
         get :show do
           validate_and_execute(
             ShowCommand.new(configuration)
@@ -148,12 +168,21 @@ module Rosette
 
         #### STATUS ####
 
+        desc 'Translation progress for a given commit'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String, presence: true
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String, presence: true,
+            desc: 'The git ref to get the status for. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
         end
 
-        desc 'Translation progress for a given commit'
         get :status do
           status = validate_and_execute(
             StatusCommand.new(configuration)
@@ -173,14 +202,32 @@ module Rosette
 
         #### DIFF ####
 
+        desc 'Lists the phrases that were added, removed, or changed between two commits'
+
         params do
-          requires :repo_name, type: String
-          requires :head_ref, type: String, presence: true
-          requires :diff_point_ref, type: String, presence: true
-          optional :paths, type: String
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+          }
+
+          requires :head_ref, {
+            type: String, presence: true,
+            desc: 'The git ref to compare against diff_point_ref. This is usually a HEAD (i.e. branch name). ' +
+              'Can be either a git symbolic ref (i.e. branch name) or a git commit id.'
+          }
+
+          requires :diff_point_ref, {
+            type: String, presence: true,
+            desc: 'The git ref to compare to head_ref. This is usually master or some common parent. ' +
+              'Can be either a git symbolic ref (i.e. branch name) or a git commit id.'
+          }
+
+          optional :paths, {
+            type: String,
+            desc: 'A space-separated list of paths to include in the diff.'
+          }
         end
 
-        desc 'List phrases added/removed/changed between two commits'
         get :diff do
           validate_and_execute(
             DiffCommand.new(configuration)
@@ -195,12 +242,22 @@ module Rosette
 
         #### SNAPSHOT ####
 
+        desc 'Returns the translations for the most recent changes for each file in the repository'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String, presence: true
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository in which to take the snapshot. Must be configured in the ' +
+              'current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String, presence: true,
+            desc: 'The git ref to take the snapshot of. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
         end
 
-        desc 'Returns the translations for the most recent changes for each file in the repository'
         get :snapshot do
           validate_and_execute(
             SnapshotCommand.new(configuration)
@@ -211,12 +268,22 @@ module Rosette
 
         #### REPO SNAPSHOT (snapshot without translations) ####
 
+        desc 'Returns the commit ids for the most recent changes for each file in the repository'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String, presence: true
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository in which to take the snapshot. Must be configured in the ' +
+              'current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String, presence: true,
+            desc: 'The git ref to take the snapshot of. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
         end
 
-        desc 'Returns the commit ids for the most recent changes for each file in the repository'
         get :repo_snapshot do
           validate_and_execute(
             RepoSnapshotCommand.new(configuration)
@@ -226,20 +293,49 @@ module Rosette
         end
       end
 
-      resource :translations do
+      resource :translations, { desc: 'Perform various operations on translations' } do
         #### ADD TRANSLATION ####
 
+        desc 'Associates a translation with a key or meta key'
+
         params do
-          requires :repo_name, type: String
-          requires :translation, type: String
-          requires :locale, type: String, presence: true
-          optional :key, type: String
-          optional :meta_key, type: String
-          requires :ref, type: String
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository the translation belongs to. Must be configured in the ' +
+              'current Rosette config.'
+          }
+
+          requires :translation, {
+            type: String,
+            desc: 'The translated text.'
+          }
+
+          requires :locale, {
+            type: String, presence: true,
+            desc: 'The locale of the translated text'
+          }
+
+          optional :key, {
+            type: String,
+            desc: 'The key to associate the translation with. Either key or meta_key must be specified. ' +
+              'If key is not specified, meta_key must be. If neither is specified, an error will be returned.'
+          }
+
+          optional :meta_key, {
+            type: String,
+            desc: 'The meta key to associate the translation with. Either key or meta_key must be specified. ' +
+              'If meta_key is not specified, key must be. If neither is specified, an error will be returned.'
+          }
+
+          requires :ref, {
+            type: String,
+            desc: 'The git ref to associate the translation with. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
+
           at_least_one_of :key, :meta_key  # @TODO: only works with grape master
         end
 
-        desc 'Associates a translation with the key or meta key given'
         post :add_or_update do
           validate_and_execute(
             AddOrUpdateTranslationCommand.new(configuration)
@@ -255,17 +351,51 @@ module Rosette
 
         #### EXPORT ####
 
+        desc 'Retrieve and serialize the phrases and translations for a given ref'
+
         params do
-          requires :repo_name, type: String
-          requires :ref, type: String
-          requires :locale, type: String, presence: true
-          requires :serializer, type: String
-          optional :base_64_encode, type: Boolean
-          optional :encoding, type: String
-          optional :include_snapshot, type: Boolean
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to export translations from. Must be configured in the ' +
+              'current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String,
+            desc: 'The git ref to export translations from. Can be either a git symbolic ref (i.e. branch ' +
+              'name) or a git commit id.'
+          }
+
+          requires :locale, {
+            type: String, presence: true,
+            desc: 'The locale of the translations to retrieve.'
+          }
+
+          requires :serializer, {
+            type: String,
+            desc: 'The serializer to use to serialize the phrases in the given ref. The serializer must ' +
+              'have been configured in the configuration for the repo.'
+          }
+
+          optional :base_64_encode, {
+            type: Boolean,
+            desc: 'If set to true, the serialized phrases will be base-64 encoded. This is often desirable ' +
+              'to avoid unexpected encoding issues when transmitting data over the Internet.'
+          }
+
+          optional :encoding, {
+            type: String,
+            desc: 'The text encoding to encode the phrases in before serialization. Any encoding supported ' +
+              'by Ruby can be specified, eg. UTF-8, UTF-16, US-ASCII, etc.'
+          }
+
+          optional :include_snapshot, {
+            type: Boolean,
+            desc: 'If true, includes the snapshot (hash of paths to commit ids) that was used to identify the' +
+              'phrases and therefore translations in the response.'
+          }
         end
 
-        desc 'Retrieve and serialize the phrases and translations for a given ref'
         get :export do
           validate_and_execute(
             ExportCommand.new(configuration)
@@ -279,6 +409,8 @@ module Rosette
           )
         end
       end
+
+      add_swagger_documentation api_version: 'v1'
     end
 
   end

@@ -21,6 +21,7 @@ gem 'commonjs-rhino', path: '~/workspace/commonjs-rhino'
 gem 'puma'
 
 gem 'concurrent-ruby', '~> 0.7.0'
+gem 'grape-swagger', '~> 0.8.0'
 
 group :development, :test do
   gem 'jbundler'
