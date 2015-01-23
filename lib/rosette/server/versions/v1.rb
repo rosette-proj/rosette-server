@@ -398,6 +398,11 @@ module Rosette
             desc: 'If true, includes the snapshot (hash of paths to commit ids) that was used to identify the' +
               'phrases and therefore translations in the response.'
           }
+
+          optional :include_checksum, {
+            type: Boolean,
+            desc: 'If true, includes an MD5 checksum of the exported translations.'
+          }
         end
 
         get :export do
@@ -410,6 +415,7 @@ module Rosette
               .set_base_64_encode(params.fetch(:base_64_encode, false))
               .set_encoding(params.fetch(:encoding, Rosette::Core::DEFAULT_ENCODING.to_s))
               .set_include_snapshot(params.fetch(:include_snapshot, false))
+              .set_include_checksum(params.fetch(:include_checksum, false))
           )
         end
       end
