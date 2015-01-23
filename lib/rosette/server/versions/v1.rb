@@ -40,14 +40,14 @@ module Rosette
               command.execute
             rescue => e
               configuration.error_reporter.report_error(e, get_extra_fields)
-              error!({ error: e.message }, 400)
+              error!({ error: e.message }, 500)
             end
           else
             errors = command.messages.flat_map do |field, messages|
               messages
             end
 
-            error!({ error: errors.first }, 400)
+            error!({ error: errors.first }, 422)
           end
         end
 
@@ -118,7 +118,7 @@ module Rosette
           }
         end
 
-        get :commit do
+        post :commit do
           validate_and_execute(
             FetchCommand.new(configuration)
               .set_repo_name(params[:repo_name])
@@ -346,7 +346,7 @@ module Rosette
               .set_translation(params[:translation])
               .set_locale(params[:locale])
           )
-          {}
+          {}  # @TODO: success or failure? return translation object
         end
 
         #### EXPORT ####
