@@ -342,11 +342,15 @@ module Rosette
               .set_repo_name(params[:repo_name])
               .set_key(params[:key])
               .set_meta_key(params[:meta_key])
-              .set_ref(params[:ref])
+              .set_refs([params[:ref]])
               .set_translation(params[:translation])
               .set_locale(params[:locale])
-          )
-          {}
+          ).map do |translation_status|
+            {
+              status: translation_status[:status],
+              translation: translation_status[:translation].to_h
+            }
+          end
         end
 
         #### EXPORT ####
