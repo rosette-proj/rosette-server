@@ -65,13 +65,24 @@ module Rosette
       version 'v1', using: :path
       format :json
 
-      resource :extractors, { desc: 'Information about configured extractors.' } do
-        desc 'List configured extractors'
-        get :list do
-          configuration
-            .repo_configs.each_with_object({}) do |config, ret|
-              ret[config.name] = config.extractor_configs.map { |config| config.extractor.class.to_s }
-            end
+      resource :locales, { desc: 'Information about configured locales.' } do
+        desc 'List configured locales'
+
+        params do
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository to get locales for. Must be configured in the current Rosette config.'
+          }
+        end
+
+        get do
+          configuration.get_repo(params[:repo_name]).locales.map do |locale|
+            {
+              language: locale.language,
+              territory: locale.territory,
+              code: locale.code
+            }
+          end
         end
       end
 
