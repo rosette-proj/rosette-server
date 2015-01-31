@@ -91,26 +91,6 @@ module Rosette
         true
       end
 
-      # @TODO: remove
-      desc 'List configured environment variables. Will be removed soon.'
-      get :env do
-        ENV.to_h
-      end
-
-      # @TODO: remove
-      desc 'Show the value for a given java system property.'
-
-      params do
-        requires :prop, {
-          type: String,
-          desc: 'The name of the property to retrieve.'
-        }
-      end
-
-      get :property do
-        [System.getProperty(params[:prop])]
-      end
-
       resource :git, { desc: 'Perform various git-insipired operations on phrases and translations' } do
         #### COMMIT ####
 
