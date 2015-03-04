@@ -14,12 +14,10 @@ module Rosette
 
         attr_reader :config, :repo_config, :extractor_configs
         attr_reader :error_reporter, :progress_reporter
-        attr_reader :path_matcher
 
         def initialize(options = {})
           @config = options.fetch(:config)
           @repo_config = options.fetch(:repo_config)
-          @path_matcher = options.fetch(:path_matcher)
           @extractor_configs = options.fetch(:extractors, repo_config.extractor_configs)
           @error_reporter = options.fetch(:error_reporter, Rosette::Core::NilErrorReporter.instance)
           @progress_reporter = options.fetch(:progress_reporter, ProgressReporters::NilProgressReporter.instance)
@@ -107,14 +105,14 @@ module Rosette
 
         def target_changed?(diff)
           diff.any? do |entry|
-            path_matcher.matches?(entry.getNewPath)
+            path_matches?(entry.getNewPath)
           end
         end
 
         # target means foreign language(s) in most cases
         def target_changes(diff)
           diff.each_with_object([]) do |entry, paths|
-            if path_matcher.matches?(entry.getNewPath)
+            if path_matches?(entry.getNewPath)
               paths << entry.getNewPath
             end
           end
@@ -149,6 +147,10 @@ module Rosette
               end
             end
           end
+        end
+
+        def path_matches?(path)
+          !!repo_config.get_translation_path_matcher(path)
         end
 
         def deduce_locale(path)
