@@ -138,7 +138,7 @@ module Rosette
                 source_commit.getId.name
               end
 
-              if locale = deduce_locale(repo_config, path)
+              if locale = deduce_locale(path)
                 commit_ids.each do |commit_id|
                   trans_count = import_translations(path, file_contents, commit_id, locale)
 
@@ -151,8 +151,8 @@ module Rosette
           end
         end
 
-        def deduce_locale(commit_id, path)
-          raise NotImplementedError
+        def deduce_locale(path)
+          repo_config.deduce_locale_from_path(path)
         end
 
         def import_translations(path, file_contents, commit_id, locale)
