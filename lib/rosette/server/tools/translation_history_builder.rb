@@ -69,6 +69,11 @@ module Rosette
               process_changes(pool, source_commits.dup, cur_commit, target_changes(diff))
               source_commits.clear
             end
+
+            config.datastore.add_or_update_commit_log(
+              repo_config.name, cur_commit.getId.name, nil,
+              Rosette::DataStores::PhraseStatus::TRANSLATED
+            )
           end
 
           pool.shutdown
