@@ -372,6 +372,12 @@ module Rosette
               'have been configured in the configuration for the repo.'
           }
 
+          optional :paths, {
+            type: String,
+            desc: 'When phrases are extracted, the path of the file they were extracted from gets recorded. ' +
+              'With this parameter, specify a pipe-separated list of paths to include in the export.'
+          }
+
           optional :base_64_encode, {
             type: Boolean,
             desc: 'If set to true, the serialized phrases will be base-64 encoded. This is often desirable ' +
@@ -403,6 +409,7 @@ module Rosette
               .set_ref(params[:ref])
               .set_locale(params[:locale])
               .set_serializer(params[:serializer])
+              .set_paths(params.fetch(:paths, '').split('|'))
               .set_base_64_encode(params.fetch(:base_64_encode, false))
               .set_encoding(params.fetch(:encoding, Rosette::Core::DEFAULT_ENCODING.to_s))
               .set_include_snapshot(params.fetch(:include_snapshot, false))
