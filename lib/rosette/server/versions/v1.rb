@@ -285,65 +285,6 @@ module Rosette
       end
 
       resource :translations, { desc: 'Perform various operations on translations' } do
-        #### ADD TRANSLATION ####
-
-        desc 'Associates a translation with a key or meta key'
-
-        params do
-          requires :repo_name, {
-            type: String,
-            desc: 'The name of the repository the translation belongs to. Must be configured in the ' +
-              'current Rosette config.'
-          }
-
-          requires :translation, {
-            type: String,
-            desc: 'The translated text.'
-          }
-
-          requires :locale, {
-            type: String, presence: true,
-            desc: 'The locale of the translated text'
-          }
-
-          optional :key, {
-            type: String,
-            desc: 'The key to associate the translation with. Either key or meta_key must be specified. ' +
-              'If key is not specified, meta_key must be. If neither is specified, an error will be returned.'
-          }
-
-          optional :meta_key, {
-            type: String,
-            desc: 'The meta key to associate the translation with. Either key or meta_key must be specified. ' +
-              'If meta_key is not specified, key must be. If neither is specified, an error will be returned.'
-          }
-
-          requires :ref, {
-            type: String,
-            desc: 'The git ref to associate the translation with. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
-          }
-
-          at_least_one_of :key, :meta_key  # @TODO: only works with grape master
-        end
-
-        post :add_or_update do
-          validate_and_execute(
-            AddOrUpdateTranslationCommand.new(configuration)
-              .set_repo_name(params[:repo_name])
-              .set_key(params[:key])
-              .set_meta_key(params[:meta_key])
-              .set_refs([params[:ref]])
-              .set_translation(params[:translation])
-              .set_locale(params[:locale])
-          ).map do |translation_status|
-            {
-              status: translation_status[:status],
-              translation: translation_status[:translation].to_h
-            }
-          end
-        end
-
         #### EXPORT ####
 
         desc 'Retrieve and serialize the phrases and translations for a given ref'

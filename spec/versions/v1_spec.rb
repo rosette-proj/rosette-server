@@ -140,7 +140,7 @@ describe Rosette::Server::V1 do
           it 'gives the status of that commit' do
             subject
             expect(subject['locales'].count).to eq(locales.count)
-            expect(subject['status']).to eq(Rosette::DataStores::PhraseStatus::UNTRANSLATED)
+            expect(subject['status']).to eq(Rosette::DataStores::PhraseStatus::NOT_SEEN)
             expect(subject['commit_id']).to eq(ref)
           end
 
@@ -148,84 +148,6 @@ describe Rosette::Server::V1 do
       end
     end
 
-  end
-
-  describe 'Translations commands' do
-    describe 'GET /v1/translations/add_or_update' do
-      let(:path) { '/v1/translations/add_or_update' }
-
-      let(:locale) { 'de-DE' }
-      let(:translation) { Faker::Lorem.sentence }
-      let(:key_param) { key }
-      let(:meta_key_param) { meta_key }
-      let(:params) do
-        {
-          repo_name: repo_name,
-          ref: ref,
-          locale: locale,
-          key: key_param,
-          meta_key: meta_key_param,
-          translation: translation
-        }
-      end
-
-
-      subject { JSON.parse(get(path, params).body) }
-
-      before do
-        get('/v1/git/commit', { repo_name: repo_name, ref: ref } )
-      end
-
-      context 'with both key and meta_key not present' do
-        let(:meta_key_param) { nil }
-        let(:key_param) { nil }
-
-        it 'raises an error' do
-          expect { subject }.to raise_error(Rosette::DataStores::Errors::PhraseNotFoundError)
-        end
-      end
-
-      context 'when the locale is not supported by the server' do
-        let(:unsupported_locale) { 'en-PI' }
-        let(:locale) { unsupported_locale }
-
-        it 'raises an error' do
-          expect(subject['error']).to match(/doesn't support the \'#{locale}\' locale/)
-        end
-      end
-
-      context 'when a key is present and a meta_key is not' do
-        let(:meta_key_param) { nil }
-
-        it 'adds the correct translation' do
-          subject
-          translation_entry = translation_model.entries.last
-          expect(translation_entry.locale).to eq(locale)
-          expect(translation_entry.translation).to eq(translation)
-        end
-      end
-
-      context 'when a meta_key is present and a key is not' do
-        let(:key_param) { nil }
-
-        it 'adds the correct translation' do
-          subject
-          translation_entry = translation_model.entries.last
-          expect(translation_entry.locale).to eq(locale)
-          expect(translation_entry.translation).to eq(translation)
-        end
-      end
-
-      context 'when both key and meta_key are present' do
-
-        it 'adds the correct translation' do
-          subject
-          translation_entry = translation_model.entries.last
-          expect(translation_entry.locale).to eq(locale)
-          expect(translation_entry.translation).to eq(translation)
-        end
-      end
-    end
   end
 
   def phrase_model

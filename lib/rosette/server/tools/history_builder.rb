@@ -64,7 +64,7 @@ module Rosette
           config.datastore.add_or_update_commit_log(
             repo_config.name, commit_id,
             Time.at(rev_commit.getCommitTime),
-            Rosette::DataStores::PhraseStatus::UNTRANSLATED,
+            Rosette::DataStores::PhraseStatus::FINALIZED,
             phrase_counter
           )
         rescue => e
