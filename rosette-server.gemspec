@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
 
-  s.add_dependency 'grape', '~> 0.9.0'
+  s.add_dependency 'grape', '~> 0.9'
+  s.add_dependency 'grape-swagger', '~> 0.8'
 
   s.require_path = 'lib'
   s.files = Dir["{lib,spec}/**/*", "Gemfile", "History.txt", "README.md", "Rakefile", "rosette-server.gemspec"]
