@@ -1,37 +1,40 @@
 # encoding: UTF-8
 
 java_import java.lang.System
-java_import 'java.net.URLClassLoader'
+java_import java.net.URLClassLoader
 
-require 'shellwords'
-
+require 'grape'
+require 'grape-swagger'
 require 'rosette/core'
-require 'rosette/server/version'
 require 'rosette/server/tools'
+require 'rosette/server/version'
+require 'shellwords'
 
 module Rosette
   module Server
 
-    class V1 < Grape::API
+    class ApiV1 < Grape::API
       include Rosette::Core::Commands
       logger Rosette.logger
 
-      def self.configuration
-        @configuration
-      end
+      attr_reader :rosette_config
 
-      def self.set_configuration(configuration)
-        @configuration = configuration
-        configuration.apply_integrations(self)
+      def initialize(rosette_config)
+        @rosette_config = rosette_config
+        rosette_config.apply_integrations(self.class)
+
+        self.class.helpers do
+          define_method(:configuration) do
+            rosette_config
+          end
+        end
+
+        super()
       end
 
       helpers do
-        def configuration
-          V1.configuration
-        end
-
         def logger
-          V1.logger
+          ApiV1.logger
         end
 
         def validate_and_execute(command)

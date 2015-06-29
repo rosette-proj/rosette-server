@@ -1,9 +1,8 @@
 # encoding: UTF-8
 
-require 'grape'
-require 'grape-swagger'
-require 'rosette/server/versions/v1'
-
-class Server < Grape::API
-  mount Rosette::Server::V1
+module Rosette
+  module Server
+    autoload :Builder, 'rosette/server/builder'
+    autoload :ApiV1,   'rosette/server/api_v1'
+  end
 end
