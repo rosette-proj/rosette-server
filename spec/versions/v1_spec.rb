@@ -1,160 +1,365 @@
-require 'spec_helper'
-require 'yaml/store'
+# encoding: UTF-8
 
-describe Rosette::Server::V1 do
+require 'spec_helper'
+
+include Rosette::Core
+include Rosette::Core::Commands
+
+describe Rosette::Server::ApiV1 do
   include Rack::Test::Methods
 
-  let(:repo) { TmpRepo.new }
-  let(:repo_name) { 'pretty-cool-repo' }
-  let(:ref) { repo.git("log -1 --pretty=%H").chomp }
-  let(:yaml_path) { 'test.yml' }
-  let(:locales) { %w(en-US de-DE es) }
-  let(:bogus_ref) { Faker::Lorem.characters(40) }
-  let(:key) { Faker::Lorem.sentence }
-  let(:meta_key) { Faker::Lorem.word }
+  let(:version) { 'v1' }
+  let(:repo_name) { 'my_repo' }
+  let(:ref) { 'master' }
+
+  # NOTE:
+  # Creating an instance of the API on each test run reeeeeally slows down the
+  # test suite. Best guess it's because of Grape's internal metaprogramming
+  # spaghetti mess. Since none of the tests/endpoints change the state of the
+  # system, it should be safe to set global $app and $config variables here.
+
+  let(:app) do
+    $app ||= Rosette::Server::ApiV1.new(configuration)
+  end
 
   let(:configuration) do
-    Rosette.build_config do |config|
-      config.use_datastore('in-memory')
+    $config ||= Rosette.build_config do |config|
+      config.use_error_reporter(BufferedErrorReporter.new)
       config.add_repo(repo_name) do |repo_config|
-        repo_config.add_locales(locales)
-        repo_config.set_path(File.join(repo.working_dir, '/.git'))
-
-        repo_config.add_extractor('yaml/rails') do |ext|
-          ext.set_conditions do |cond|
-            cond.match_file_extension('.yml').and(
-              cond.match_path(yaml_path)
-            )
-          end
-        end
+        repo_config.add_locales(%w(es ko-KR))
       end
     end
   end
 
-  def app
-    Rosette::Server::V1
-  end
-
-  before do
-    Rosette::Server::V1.set_configuration(configuration)
-
-    file = repo.create_file(yaml_path)
-
-    YAML::Store.new(file.path).tap do |store|
-      store.transaction do
-        store['en'] = { meta_key => key }
-      end
-    end
-
-    repo.add_all
-    repo.commit("here is a commit message")
-
-    # Can't fetch b/c there is no origin...probably a better way to do this
-    allow_any_instance_of(Rosette::Core::Commands::FetchCommand).to receive(:execute) { double('execute') }
-  end
-
-  shared_examples 'a malformed request' do
-    subject { get(path, params) }
-
-    it 'returns a 400' do
-      expect(subject.status).to eq(400)
-    end
-  end
-
-  describe 'GET /v1/extractors/list' do
-    subject { JSON.parse(get('/v1/extractors/list').body) }
-
-    it 'returns a list of configured extractors' do
-      expect(subject[repo_name]).to be_instance_of(Array)
-      expect(subject[repo_name].first).to match(/RailsExtractor/)
-    end
-  end
-
-  describe 'Git commands' do
-
-    describe 'GET /v1/git/commit' do
-      let(:path) { '/v1/git/commit' }
-      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
-
-      it_should_behave_like 'a malformed request'
-
-      context 'with required parameters present' do
-        let(:params) { { repo_name: repo_name, ref: ref } }
-
-        it 'stores the phrase for that commit' do
-          get(path, params)
-          phrase = phrase_model.first
-          expect(phrase_model.count).to eq(1)
-          expect(phrase.commit_id).to eq(ref)
-          expect(phrase.key).to eq(key)
+  def expect_command(klass, endpoint)
+    expect(endpoint).to(
+      receive(:validate_and_execute)
+        .with(kind_of(klass))
+        .and_wrap_original do |m, command|
+          yield command if block_given?
+          m.call(command)
         end
-      end
-    end
+    )
+  end
 
-    describe 'GET /v1/git/show' do
-      let(:path) { '/v1/git/show' }
-      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
+  let(:body) { JSON.parse(last_response.body) }
+  let(:status) { last_response.status }
 
-      it_should_behave_like 'a malformed request'
+  def visit
+    get(path, params)
+  end
 
-      context 'with required parameters present' do
-        let(:params) { { repo_name: repo_name, ref: ref } }
+  def make_phrase(key, meta_key)
+    Rosette::Core::Phrase.new(key, meta_key)
+  end
 
-        before do
-          get('/v1/git/commit', params)
-        end
-
-        subject { JSON.parse(get(path, params).body) }
-
-        it 'contains keys for added, deleted and modified strings' do
-          expect(subject).to include('added', 'removed', 'modified')
-        end
-
-        it 'lists the phrases added in the commit' do
-          expect(subject['added'].first['key']).to eq(key)
+  shared_examples 'an invalid command' do
+    it 'renders a 400 when command is invalid' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(command_klass, endpoint) do |command|
+          expect(command).to receive(:valid?).and_return(false)
         end
       end
 
+      visit
+      expect(status).to eq(400)
     end
 
-    describe 'GET /v1/git/status' do
-      let(:path) { '/v1/git/status' }
-      let(:params) { { repo_name: repo_name, ref: bogus_ref } }
+    it 'renders a 500 after encountering an unexpected error' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(command_klass, endpoint) do |command|
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_raise(RuntimeError, 'oops!')
+        end
+      end
 
-      it_should_behave_like 'a malformed request'
+      visit
+      expect(status).to eq(500)
 
-      subject { JSON.parse(get(path, params).body) }
+      expect(configuration.error_reporter.errors_found?).to eq(true)
+      error = configuration.error_reporter.errors.first
+      expect(error[:error]).to be_a(RuntimeError)
+      expect(error[:error].message).to eq('oops!')
+    end
+  end
 
-      context 'with required parameters present' do
-        let(:params) { { repo_name: repo_name, ref: ref } }
+  after(:each) do
+    Grape::Endpoint.before_each(nil)
+  end
 
-        it 'indicates that the commit has not been processed' do
-          expect(subject['detail']).to eq("Commit #{ref} hasn't been processed yet")
+  describe '/alive.json' do
+    let(:params) { {} }
+    let(:path) { "#{version}/alive.json" }
+    let(:body) { last_response.body }  # override
+
+    it "always returns a simple plaintext 'true'" do
+      visit
+      expect(status).to eq(200)
+      expect(body).to eq('true')
+    end
+  end
+
+  describe '/locales.json' do
+    let(:params) { { repo_name: repo_name } }
+    let(:path) { "#{version}/locales.json" }
+
+    it 'returns a list of the locales the repo supports' do
+      visit
+      expect(status).to eq(200)
+
+      expect(body).to eq([
+        { 'language' => 'es', 'territory' => nil, 'code' => 'es' },
+        { 'language' => 'ko', 'territory' => 'KR', 'code' => 'ko-KR' }
+      ])
+    end
+
+    it 'renders a 500 if an error is raised' do
+      expect(configuration).to receive(:get_repo).and_raise(RuntimeError)
+      visit
+      expect(status).to eq(500)
+      expect(body).to include('error')
+    end
+  end
+
+  describe '/git/commit.json' do
+    let(:params) { { repo_name: repo_name, ref: ref } }
+    let(:path) { "#{version}/git/commit.json" }
+
+    it 'fetches, commits, and shows' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(FetchCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute)
         end
 
-        context 'commit has been processed' do
-          before do
-            get('/v1/git/commit', { repo_name: repo_name, ref: ref } )
-          end
+        expect_command(CommitCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute)
+        end
 
-          it 'gives the status of that commit' do
-            subject
-            expect(subject['locales'].count).to eq(locales.count)
-            expect(subject['status']).to eq(Rosette::DataStores::PhraseStatus::NOT_SEEN)
-            expect(subject['commit_id']).to eq(ref)
-          end
+        expect_command(ShowCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return(
+            'added' => %w(a b c), 'removed' => %w(d), 'modified' => %w(e f g h)
+          )
+        end
+      end
 
+      visit
+      expect(status).to eq(200)
+
+      expect(body).to eq(
+        'added' => 3, 'removed' => 1, 'modified' => 4
+      )
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { FetchCommand }
+      it_behaves_like 'an invalid command'
+    end
+  end
+
+  describe '/git/show.json' do
+    let(:params) { { repo_name: repo_name, ref: ref } }
+    let(:path) { "#{version}/git/show.json" }
+
+    it 'executes an instance of ShowCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(ShowCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return(
+            'added' => [make_phrase('foo', 'bar')],
+            'removed' => [make_phrase('baz', 'boo'), make_phrase('biz', 'bat')]
+          )
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+
+      expect(body.keys).to eq(%w(added removed))
+      expect(body['added'].size).to eq(1)
+      expect(body['added'].first['key']).to eq('foo')
+      expect(body['removed'].size).to eq(2)
+      expect(body['removed'].first['key']).to eq('baz')
+      expect(body['removed'].last['key']).to eq('biz')
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { ShowCommand }
+      it_behaves_like 'an invalid command'
+    end
+  end
+
+  describe '/git/status.json' do
+    let(:params) { { repo_name: repo_name, ref: ref } }
+    let(:path) { "#{version}/git/status.json" }
+
+    before(:each) do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(StatusCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return(status_response)
         end
       end
     end
 
+    context 'with a normal status' do
+      let(:status_response) { { status: 'foo' } }
+
+      it 'executes an instance of StatusCommand' do
+        visit
+        expect(status).to eq(200)
+        expect(body).to eq('status' => 'foo')
+      end
+    end
+
+    context 'with a nil status' do
+      let(:status_response) { nil }
+
+      it 'renders a 500 if the status is nil' do
+        visit
+        expect(status).to eq(500)
+        expect(body).to include('error')
+      end
+    end
   end
 
-  def phrase_model
-    Rosette::DataStores::InMemoryDataStore::Phrase
+  describe '/git/diff.json' do
+    let(:params) do
+      { repo_name: repo_name, head_ref: 'my_branch', diff_point_ref: ref }
+    end
+
+    let(:path) { "#{version}/git/diff.json" }
+
+    it 'executes an instance of DiffCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(DiffCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.head_commit_str).to eq('my_branch')
+          expect(command.diff_point_commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return(
+            'added' => [make_phrase('foo', 'bar')],
+            'removed' => [make_phrase('baz', 'boo'), make_phrase('biz', 'bat')]
+          )
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+
+      expect(body.keys).to eq(%w(added removed))
+      expect(body['added'].size).to eq(1)
+      expect(body['added'].first['key']).to eq('foo')
+      expect(body['removed'].size).to eq(2)
+      expect(body['removed'].first['key']).to eq('baz')
+      expect(body['removed'].last['key']).to eq('biz')
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { DiffCommand }
+      it_behaves_like 'an invalid command'
+    end
   end
 
-  def translation_model
-    Rosette::DataStores::InMemoryDataStore::Translation
+  describe '/git/snapshot.json' do
+    let(:params) do
+      { repo_name: repo_name, ref: ref }
+    end
+
+    let(:path) { "#{version}/git/snapshot.json" }
+
+    it 'executes an instance of SnapshotCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(SnapshotCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return(
+            [make_phrase('foo', 'bar')]
+          )
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+
+      expect(body.first['key']).to eq('foo')
+      expect(body.first['meta_key']).to eq('bar')
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { SnapshotCommand }
+      it_behaves_like 'an invalid command'
+    end
+  end
+
+  describe '/git/repo_snapshot.json' do
+    let(:params) do
+      { repo_name: repo_name, ref: ref }
+    end
+
+    let(:path) { "#{version}/git/repo_snapshot.json" }
+
+    it 'executes an instance of RepoSnapshotCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(RepoSnapshotCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute).and_return('foo' => 'bar')
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+      expect(body).to eq('foo' => 'bar')
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { RepoSnapshotCommand }
+      it_behaves_like 'an invalid command'
+    end
+  end
+
+  describe '/translations/export.json' do
+    let(:params) do
+      { repo_name: repo_name, ref: ref, locale: 'es', serializer: 'fake' }
+    end
+
+    let(:path) { "#{version}/translations/export.json" }
+
+    it 'executes an instance of ExportCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(ExportCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command.locale).to eq('es')
+          expect(command.serializer).to eq('fake')
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute)
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { ExportCommand }
+      it_behaves_like 'an invalid command'
+    end
+  end
+
   end
 end
