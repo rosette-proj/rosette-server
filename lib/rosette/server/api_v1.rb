@@ -74,7 +74,8 @@ module Rosette
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to get locales for. Must be configured in the current Rosette config.'
+            desc: 'The name of the repository to get locales for. Must be '\
+              'configured in the current Rosette config.'
           }
         end
 
@@ -102,13 +103,14 @@ module Rosette
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+            desc: 'The name of the repository to examine. Must be configured in '\
+              'the current Rosette config.'
           }
 
           requires :ref, {
             type: String, presence: true,
-            desc: 'The git ref to commit phrases from. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to commit phrases from. Can be either a git '\
+              'symbolic ref (i.e. branch name) or a git commit id.'
           }
         end
 
@@ -140,13 +142,14 @@ module Rosette
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+            desc: 'The name of the repository to examine. Must be configured '\
+              'in the current Rosette config.'
           }
 
           requires :ref, {
             type: String, presence: true,
-            desc: 'The git ref to list phrases for. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to list phrases for. Can be either a git '\
+              'symbolic ref (i.e. branch name) or a git commit id.'
           }
         end
 
@@ -167,13 +170,14 @@ module Rosette
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+            desc: 'The name of the repository to examine. Must be configured '\
+              'in the current Rosette config.'
           }
 
           requires :ref, {
             type: String, presence: true,
-            desc: 'The git ref to get the status for. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to get the status for. Can be either a git '\
+              'symbolic ref (i.e. branch name) or a git commit id.'
           }
         end
 
@@ -196,24 +200,28 @@ module Rosette
 
         #### DIFF ####
 
-        desc 'Lists the phrases that were added, removed, or changed between two commits'
+        desc 'Lists the phrases that were added, removed, or changed between '\
+          'two commits'
 
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to examine. Must be configured in the current Rosette config.'
+            desc: 'The name of the repository to examine. Must be configured '\
+              'in the current Rosette config.'
           }
 
           requires :head_ref, {
             type: String, presence: true,
-            desc: 'The git ref to compare against diff_point_ref. This is usually a HEAD (i.e. branch name). ' +
-              'Can be either a git symbolic ref (i.e. branch name) or a git commit id.'
+            desc: 'The git ref to compare against diff_point_ref. This is '\
+              'usually a HEAD (i.e. branch name). Can be either a git symbolic '\
+              'ref (i.e. branch name) or a git commit id.'
           }
 
           requires :diff_point_ref, {
             type: String, presence: true,
-            desc: 'The git ref to compare to head_ref. This is usually master or some common parent. ' +
-              'Can be either a git symbolic ref (i.e. branch name) or a git commit id.'
+            desc: 'The git ref to compare to head_ref. This is usually master '\
+              'or some common parent. Can be either a git symbolic ref (i.e. '\
+              'branch name) or a git commit id.'
           }
 
           optional :paths, {
@@ -236,19 +244,20 @@ module Rosette
 
         #### SNAPSHOT ####
 
-        desc 'Returns the translations for the most recent changes for each file in the repository'
+        desc 'Returns the phrases for the most recent changes for each file '\
+          'in the repository'
 
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository in which to take the snapshot. Must be configured in the ' +
-              'current Rosette config.'
+            desc: 'The name of the repository in which to take the snapshot. '\
+              'Must be configured in the current Rosette config.'
           }
 
           requires :ref, {
             type: String, presence: true,
-            desc: 'The git ref to take the snapshot of. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to take the snapshot of. Can be either a git '\
+              'symbolic ref (i.e. branch name) or a git commit id.'
           }
         end
 
@@ -262,19 +271,20 @@ module Rosette
 
         #### REPO SNAPSHOT (snapshot without translations) ####
 
-        desc 'Returns the commit ids for the most recent changes for each file in the repository'
+        desc 'Returns the commit ids for the most recent changes for each '\
+          'file in the repository'
 
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository in which to take the snapshot. Must be configured in the ' +
-              'current Rosette config.'
+            desc: 'The name of the repository in which to take the snapshot. '\
+              'Must be configured in the current Rosette config.'
           }
 
           requires :ref, {
             type: String, presence: true,
-            desc: 'The git ref to take the snapshot of. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to take the snapshot of. Can be either a git '\
+              'symbolic ref (i.e. branch name) or a git commit id.'
           }
         end
 
@@ -295,14 +305,14 @@ module Rosette
         params do
           requires :repo_name, {
             type: String,
-            desc: 'The name of the repository to export translations from. Must be configured in the ' +
-              'current Rosette config.'
+            desc: 'The name of the repository to export translations from. '\
+              'Must be configured in the current Rosette config.'
           }
 
           requires :ref, {
             type: String,
-            desc: 'The git ref to export translations from. Can be either a git symbolic ref (i.e. branch ' +
-              'name) or a git commit id.'
+            desc: 'The git ref to export translations from. Can be either a '\
+              'git symbolic ref (i.e. branch name) or a git commit id.'
           }
 
           requires :locale, {
@@ -312,32 +322,37 @@ module Rosette
 
           requires :serializer, {
             type: String,
-            desc: 'The serializer to use to serialize the phrases in the given ref. The serializer must ' +
-              'have been configured in the configuration for the repo.'
+            desc: 'The serializer to use to serialize the phrases in the given '\
+              'ref. The serializer must have been configured in the '\
+              'configuration for the repo.'
           }
 
           optional :paths, {
             type: String,
-            desc: 'When phrases are extracted, the path of the file they were extracted from gets recorded. ' +
-              'With this parameter, specify a pipe-separated list of paths to include in the export.'
+            desc: 'When phrases are extracted, the path of the file they were '\
+              'extracted from gets recorded. With this parameter, specify a '\
+              'pipe-separated list of paths to include in the export.'
           }
 
           optional :base_64_encode, {
             type: Boolean,
-            desc: 'If set to true, the serialized phrases will be base-64 encoded. This is often desirable ' +
-              'to avoid unexpected encoding issues when transmitting data over the Internet.'
+            desc: 'If set to true, the serialized phrases will be base-64 '\
+              'encoded. This is often desirable to avoid unexpected encoding '\
+              'issues when transmitting data over the Internet.'
           }
 
           optional :encoding, {
             type: String,
-            desc: 'The text encoding to encode the phrases in before serialization. Any encoding supported ' +
-              'by Ruby can be specified, eg. UTF-8, UTF-16, US-ASCII, etc.'
+            desc: 'The text encoding to encode the phrases in before '\
+              'serialization. Any encoding supported by Ruby can be specified, '\
+              'eg. UTF-8, UTF-16, US-ASCII, etc.'
           }
 
           optional :include_snapshot, {
             type: Boolean,
-            desc: 'If true, includes the snapshot (hash of paths to commit ids) that was used to identify the' +
-              'phrases and therefore translations in the response.'
+            desc: 'If true, includes the snapshot (hash of paths to commit '\
+              'ids) that was used to identify the phrases and therefore '\
+              'translations in the response.'
           }
 
           optional :include_checksum, {
