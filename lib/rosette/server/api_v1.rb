@@ -43,7 +43,7 @@ module Rosette
               command.execute
             rescue => e
               configuration.error_reporter.report_error(e, get_extra_fields)
-              error!({ error: e.message }, 400)
+              error!({ error: e.message }, 500)
             end
           else
             errors = command.messages.flat_map do |field, messages|
