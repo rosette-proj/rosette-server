@@ -16,3 +16,8 @@ desc 'Run specs'
 RSpec::Core::RakeTask.new do |t|
   t.pattern = './spec/**/*_spec.rb'
 end
+
+task :update_readme do
+  require './readme_updater'
+  ReadmeUpdater.update_readme
+end

@@ -1,13 +1,14 @@
 # encoding: UTF-8
 
-require 'jbundler'
+require 'expert'
+Expert.environment.require_all
+
 require 'grape'
-require 'rack/test'
-require 'java'
-require 'rosette/core'
-require 'rosette/data_stores/in_memory_data_store'
 require 'json'
 require 'pry'
+require 'rack/test'
+require 'rosette/core'
+require 'rosette/data_stores/in_memory_data_store'
 require 'tmp-repo'
 
 module Rosette
@@ -15,7 +16,3 @@ module Rosette
 end
 
 require 'rosette/server'
-
-
-
-

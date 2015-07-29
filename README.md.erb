@@ -1,0 +1,64 @@
+rosette-server
+========
+->
+## Installation
+->
+`gem install rosette-server`
+->
+## Usage
+->
+```ruby
+require 'rosette/server'
+```
+->
+# Intro
+->
+`Rosette::Server` provides a simple Rack-based JSON API for your Rosette config. Just plug in your Rosette config and stand up the server. For example, you might put this in your `config.ru` file:
+->
+```ruby
+require 'rosette/core'
+require 'rosette/server'
+->
+rosette_config = Rosette.build_config do |config|
+  # your configuration here
+end
+->
+run Rosette::Server::ApiV1.new(rosette_config)
+```
+->
+Then run `bundle exec rackup` to start the server.
+->
+# Endpoints
+->
+The following endpoints and their parameters are listed below:
+->
+<% each_api_element do |element, level| %>
+  <% if element.endpoint? %>
+    <%= '#' * level %> <%= element.path %>
+    ->
+    <%= element.summary %>
+    ->
+    |<%= Parameter::FIELDS.map { |f| f.sub(/\A(\w)/) { $1.upcase } }.join('|') %>|
+    |<%= Parameter::FIELDS.size.times.map { ":#{'-' * 10}" }.join('|') %>|
+    <% element.parameters.each do |param| %>
+      <%= param.each_field.map { |_, value| value.to_s }.join('|') %>
+    <% end %>
+  <% else %>
+    <%= '#' * level %> <%= element.name %>
+    <%= element.description %>
+  <% end %>
+  ->
+<% end %>
+->
+## Requirements
+->
+All Rosette components only run under jRuby. Java dependencies are managed via the [expert gem](https://github.com/camertron/expert). Run `bundle exec expert install` to install Java dependencies.
+->
+## Running Tests
+->
+`bundle`, then `bundle exec expert install`, then `bundle exec rspec`.
+->
+## Authors
+->
+* Cameron C. Dutro: http://github.com/camertron
+* Matthew Low: http://github.com/11mdlow
