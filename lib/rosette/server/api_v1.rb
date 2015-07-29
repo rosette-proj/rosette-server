@@ -379,6 +379,32 @@ module Rosette
               .set_include_checksum(params.fetch(:include_checksum, false))
           )
         end
+
+        #### UNTRANSLATED ####
+
+        desc 'Identifies phrases by locale that have not yet been translated'
+
+        params do
+          requires :repo_name, {
+            type: String,
+            desc: 'The name of the repository the phrases were found in. Must '\
+              'be configured in the current Rosette config.'
+          }
+
+          requires :ref, {
+            type: String,
+            desc: 'The git ref to check translations for. Can be either a '\
+              'git symbolic ref (i.e. branch name) or a git commit id.'
+          }
+        end
+
+        get :untranslated do
+          validate_and_execute(
+            UntranslatedPhrasesCommand.new(configuration)
+              .set_repo_name(params[:repo_name])
+              .set_ref(params[:ref])
+          )
+        end
       end
 
       add_swagger_documentation api_version: 'v1'

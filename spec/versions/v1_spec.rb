@@ -361,5 +361,30 @@ describe Rosette::Server::ApiV1 do
     end
   end
 
+  describe '/translations/untranslated.json' do
+    let(:params) do
+      { repo_name: repo_name, ref: ref }
+    end
+
+    let(:path) { "#{version}/translations/untranslated.json" }
+
+    it 'executes an instance of UntranslatedPhrasesCommand' do
+      Grape::Endpoint.before_each do |endpoint|
+        expect_command(UntranslatedPhrasesCommand, endpoint) do |command|
+          expect(command.repo_name).to eq(repo_name)
+          expect(command.commit_str).to eq(ref)
+          expect(command).to receive(:valid?).and_return(true)
+          expect(command).to receive(:execute)
+        end
+      end
+
+      visit
+      expect(status).to eq(200)
+    end
+
+    describe 'error conditions' do
+      let(:command_klass) { UntranslatedPhrasesCommand }
+      it_behaves_like 'an invalid command'
+    end
   end
 end
