@@ -1,0 +1,11 @@
+sudo: false
+language: ruby
+jdk:
+  - oraclejdk8
+cache:
+  - bundler
+rvm:
+  - jruby-1.7.15
+env:
+  - GIT_BUNDLE=true JRUBY_OPTS="--2.0"
+script: 'bundle exec expert install && bundle exec rspec'

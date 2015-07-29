@@ -7,7 +7,6 @@ require 'json'
 require 'erb'
 
 class ApiElement
-
   attr_reader :swagger_hash
 
   def initialize(swagger_hash)
@@ -96,6 +95,8 @@ class ReadmeUpdater
 
     protected
 
+    # Removes leading whitespace and extraneous carriage returns. If you
+    # actually want a CR or some extra spaces, prefix the line with "->".
     def strip_leading_whitespace(str)
       str.gsub(/^(\s+)/, '').gsub(/^->/, '')
     end
