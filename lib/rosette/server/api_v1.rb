@@ -80,12 +80,16 @@ module Rosette
         end
 
         get do
-          configuration.get_repo(params[:repo_name]).locales.map do |locale|
-            {
-              language: locale.language,
-              territory: locale.territory,
-              code: locale.code
-            }
+          begin
+            configuration.get_repo(params[:repo_name]).locales.map do |locale|
+              {
+                language: locale.language,
+                territory: locale.territory,
+                code: locale.code
+              }
+            end
+          rescue => e
+            error!({ error: e.message }, 500)
           end
         end
       end
