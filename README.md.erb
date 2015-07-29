@@ -20,7 +20,7 @@ require 'rosette/core'
 require 'rosette/server'
 ->
 rosette_config = Rosette.build_config do |config|
-  # your configuration here
+->  # your configuration here
 end
 ->
 run Rosette::Server::ApiV1.new(rosette_config)
@@ -30,7 +30,7 @@ Then run `bundle exec rackup` to start the server.
 ->
 # Endpoints
 ->
-The following endpoints and their parameters are listed below:
+Supported endpoints and their parameters are listed below:
 ->
 <% each_api_element do |element, level| %>
   <% if element.endpoint? %>
